@@ -554,7 +554,7 @@ html, body, * {
   min-height: 100px;
   border: 2px solid #fff;
   position: fixed;
-  top: 20px;
+  top: 70px;
   left: 50%;
   right: auto;
   bottom: auto;
@@ -572,24 +572,6 @@ html, body, * {
   gap: 4px;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255,255,255,0.1);
-  cursor: grab;
-  max-width: 95vw;
-  word-break: break-word;
-  touch-action: none;
-}
-@media (max-width: 600px) {
-  .ip-display {
-    left: 50% !important;
-    top: 10px !important;
-    transform: translateX(-50%) !important;
-    max-width: 98vw;
-    font-size: 13px;
-    padding: 8px 4px;
-  }
-  .address-detail {
-    font-size: 12px;
-    word-break: break-word;
-  }
 }
 
 .ip-label {
