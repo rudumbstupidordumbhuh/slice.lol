@@ -307,21 +307,7 @@ function HandlePage() {
             </div>
           </div>
           <span className="fixed-view-counter shine">69,900</span>
-          
-          {/* IP Address Display */}
-          {entered && (
-            <div className="ip-display">
-              <span className="ip-label">IP:</span>
-              <span className="ip-address">
-                {ipLoading ? 'Loading...' : ipAddress}
-              </span>
-              <span className="address-label">Location:</span>
-              <span className="address-text">
-                {addressLoading ? 'Loading...' : address}
-              </span>
-            </div>
-          )}
-          
+
           {/* Song embed below profile */}
           <div className="song-embed">
             <div className="song-info" style={{width: '100%'}}>
@@ -339,6 +325,19 @@ function HandlePage() {
               </div>
             </div>
           </div>
+
+          {/* IP Address Display - moved so it doesn't affect song embed position */}
+          <div className="ip-display">
+            <span className="ip-label">IP:</span>
+            <span className="ip-address">
+              {ipLoading ? 'Loading...' : ipAddress}
+            </span>
+            <span className="address-label">Location:</span>
+            <span className="address-text">
+              {addressLoading ? 'Loading...' : address}
+            </span>
+          </div>
+
           <div className="sound-bar">
             <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
               {muted ? (
