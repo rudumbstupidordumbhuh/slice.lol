@@ -269,7 +269,6 @@ function HandlePage() {
           <span className="fixed-view-counter shine">69,900</span>
           {/* Song embed below profile */}
           <div className="song-embed">
-            <img className={`song-thumb${entered ? ' playing' : ''}`} src={songThumb} alt="song thumbnail" />
             <div className="song-info">
               <div className="song-title">{songTitle}</div>
               <div className="song-artist">{songArtist}</div>
