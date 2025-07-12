@@ -265,18 +265,20 @@ function HandlePage() {
               <span className="owner-badge small-badge" tabIndex="0">🛠️<span className="badge-tooltip">owner</span></span>
               <span className="owner-badge small-badge" tabIndex="0">💀<span className="badge-tooltip">sybau</span></span>
             </div>
-            <div className="song-embed">
-              <div className="song-info" style={{width: '100%'}}>
-                <div className="song-title">{songTitle}</div>
-                <div className="song-artist">{songArtist}</div>
-                <div className="song-time">
-                  {formatTime(audioTime)}
-                  <span className="song-time-divider"> / </span>
-                  {audioDuration ? formatTime(audioDuration) : '--:--'}
-                </div>
-                <div className="song-bar-wrap">
-                  <div className="song-bar-bg">
-                    <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
+            <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <div className="song-embed">
+                <div className="song-info" style={{width: '100%'}}>
+                  <div className="song-title">{songTitle}</div>
+                  <div className="song-artist">{songArtist}</div>
+                  <div className="song-time">
+                    {formatTime(audioTime)}
+                    <span className="song-time-divider"> / </span>
+                    {audioDuration ? formatTime(audioDuration) : '--:--'}
+                  </div>
+                  <div className="song-bar-wrap">
+                    <div className="song-bar-bg">
+                      <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -284,7 +286,31 @@ function HandlePage() {
           </div>
           <span className="fixed-view-counter shine">69,900</span>
           {/* Song embed below profile */}
-          {/* The song embed was moved to overlay-content */}
+          {/* The song embed is now moved here */}
+          <div className="sound-bar">
+            <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
+              {muted ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 9v6h4l5 5V4L7 9H3z" fill="#fff"/>
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="#fff" strokeWidth="2"/>
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 9v6h4l5 5V4L7 9H3z" fill="#fff"/>
+                </svg>
+              )}
+            </button>
+            <input
+              id="volume-slider"
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={muted ? 0 : volume}
+              onChange={e => setVolume(Number(e.target.value))}
+              disabled={muted}
+            />
+          </div>
         </>
       )}
     </div>
