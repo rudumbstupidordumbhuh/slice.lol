@@ -242,9 +242,9 @@ function HandlePage() {
         loop
         muted
         playsInline
-        className={entered ? 'background-video' : 'background-video blurred'}
-        src={'/video.mp4'}
-        onEnded={e => { e.target.currentTime = 0; e.target.play(); }}
+        className="background-video"
+        src="/video.mp4"
+        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
       />
       {!entered && (
         <div className={`entry-overlay${fadeOut ? ' fade-out' : ''}`} onClick={handleEnter}>
@@ -326,15 +326,8 @@ function HandlePage() {
   );
 }
 
-export default function App() {
-  return (
-    <video
-      autoPlay
-      loop
-      muted
-      playsInline
-      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
-      src="/video.mp4"
-    />
-  );
+function App() {
+  return <HandlePage />;
 }
+
+export default App;
