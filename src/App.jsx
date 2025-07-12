@@ -39,12 +39,52 @@ function getHandleFromPath(path) {
   return clean ? `@${clean}` : '@home';
 }
 
+// Add a custom typewriter hook for the entry message
+function useTypewriterEntry(text, speed = 120, pause = 1200) {
+  const [displayed, setDisplayed] = useState('');
+  useEffect(() => {
+    let i = 0;
+    let timeout;
+    let cancelled = false;
+    function type() {
+      if (cancelled) return;
+      setDisplayed(text.slice(0, i));
+      if (i <= text.length) {
+        timeout = setTimeout(() => {
+          i++;
+          type();
+        }, speed);
+      } else {
+        timeout = setTimeout(() => {
+          i = 0;
+          type();
+        }, pause);
+      }
+    }
+    setDisplayed('');
+    type();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [text, speed, pause]);
+  return displayed;
+}
+
 function HandlePage() {
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
   const [entered, setEntered] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [audioTime, setAudioTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef(null);
+  const [showShareMsg, setShowShareMsg] = useState(false);
+
+  const base = import.meta.env.BASE_URL;
+
+  // Typewriter for entry overlay
+  const entryTypewriter = useTypewriterEntry('click to enter...', 120, 1200);
 
   // Compute the pretty URL for the tab (simulate production URL)
   let prettyUrl;
@@ -68,7 +108,7 @@ function HandlePage() {
   useEffect(() => {
     if (entered) {
       if (!audioRef.current) {
-        const audio = new window.Audio('/care.mp3');
+        const audio = new window.Audio(base + 'care.mp3');
         audio.loop = true;
         audio.volume = muted ? 0 : volume;
         audioRef.current = audio;
@@ -109,6 +149,38 @@ function HandlePage() {
     }
   }, [entered]);
 
+  // Track audio time and duration for embed
+  useEffect(() => {
+    if (entered && audioRef.current) {
+      const updateTime = () => {
+        if (audioRef.current) {
+          setAudioTime(audioRef.current.currentTime);
+        }
+      };
+      const updateDuration = () => {
+        if (audioRef.current) {
+          setAudioDuration(audioRef.current.duration || 0);
+        }
+      };
+      audioRef.current.addEventListener('timeupdate', updateTime);
+      audioRef.current.addEventListener('loadedmetadata', updateDuration);
+      updateDuration();
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('timeupdate', updateTime);
+          audioRef.current.removeEventListener('loadedmetadata', updateDuration);
+        }
+      };
+    }
+  }, [entered]);
+
+  // Format time mm:ss
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
   const handleEnter = () => {
     setFadeOut(true);
     setTimeout(() => setEntered(true), 500); // match CSS transition duration
@@ -118,6 +190,51 @@ function HandlePage() {
     setMuted((m) => !m);
   };
 
+  // Song info
+  const songTitle = 'If You Care';
+  const songArtist = 'akiaura';
+  const songFile = 'https://cdn.discordapp.com/attachments/1393371863542923368/1393372001975930993/video.mp4?ex=6872ee4c&is=68719ccc&hm=fb3f9fbc9913e832999726aa1a57d20f4d412bc4ce50ab5b93c067a940026494&';
+  const songThumb = base + 'yk.png';
+
+  // Share handler
+  function handleShare(e) {
+    e.preventDefault();
+    if (navigator.share) {
+      navigator.share({
+        title: songTitle,
+        text: `Check out this song: ${songTitle}`,
+        url: songFile,
+      });
+    } else {
+      navigator.clipboard.writeText(songFile);
+      setShowShareMsg(true);
+      setTimeout(() => setShowShareMsg(false), 1200);
+    }
+  }
+
+  // Download handler
+  async function handleDownload(e) {
+    e.preventDefault();
+    try {
+      const response = await fetch(songFile);
+      if (!response.ok) throw new Error('Failed to fetch file');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${songTitle} - ${songArtist}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: open in new tab
+      window.open(songFile, '_blank');
+    }
+  }
+
   return (
     <div className="video-bg-container">
       <video
@@ -126,12 +243,14 @@ function HandlePage() {
         muted
         playsInline
         className={entered ? 'background-video' : 'background-video blurred'}
-        src="/video.mp4"
+        src={base + 'video.mp4'}
         onEnded={e => { e.target.currentTime = 0; e.target.play(); }}
       />
       {!entered && (
         <div className={`entry-overlay${fadeOut ? ' fade-out' : ''}`} onClick={handleEnter}>
-          <div className="entry-message">click to enter...</div>
+          <div className="entry-message">
+            <span className="typewriter-entry">{entryTypewriter}</span>
+          </div>
         </div>
       )}
       {entered && (
@@ -148,6 +267,35 @@ function HandlePage() {
             </div>
           </div>
           <span className="fixed-view-counter shine">69,900</span>
+          {/* Song embed below profile */}
+          <div className="song-embed">
+            <img className={`song-thumb${entered ? ' playing' : ''}`} src={songThumb} alt="song thumbnail" />
+            <div className="song-info">
+              <div className="song-title">{songTitle}</div>
+              <div className="song-artist">{songArtist}</div>
+              <div className="song-time">
+                {formatTime(audioTime)}
+                <span className="song-time-divider"> / </span>
+                {audioDuration ? formatTime(audioDuration) : '--:--'}
+              </div>
+              <div className="song-bar-wrap">
+                <div className="song-bar-bg">
+                  <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
+                </div>
+              </div>
+              <div className="song-embed-btns">
+                <button className="song-btn" onClick={handleDownload} type="button">
+                  Download
+                </button>
+                <button className="song-btn" onClick={handleShare} type="button">
+                  Share
+                </button>
+                {showShareMsg && (
+                  <span className="song-share-msg">Link copied!</span>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="sound-bar">
             <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
               {muted ? (

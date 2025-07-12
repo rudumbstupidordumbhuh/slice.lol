@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/slice.lol/(.*)",
+      "destination": "/slice.lol/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/slice.lol/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+} 
