@@ -169,6 +169,9 @@ function HandlePage() {
   const [address, setAddress] = useState('');
   const [addressLoading, setAddressLoading] = useState(true);
   const [locationDetails, setLocationDetails] = useState(null);
+  const [bubbles, setBubbles] = useState([]);
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const mouseMoveTimeout = useRef(null);
 
   // Helper to get country flag emoji from country code
   function getFlagEmoji(countryCode) {
@@ -532,8 +535,73 @@ function HandlePage() {
     };
   }, []);
 
+  // Bubble trail effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const currentPos = { x: e.clientX, y: e.clientY };
+      const lastPos = lastMousePos.current;
+      
+      // Only create bubble if mouse moved enough distance
+      const distance = Math.sqrt(
+        Math.pow(currentPos.x - lastPos.x, 2) + 
+        Math.pow(currentPos.y - lastPos.y, 2)
+      );
+      
+      if (distance > 10) { // Minimum distance to create bubble
+        const newBubble = {
+          id: Date.now() + Math.random(),
+          x: currentPos.x,
+          y: currentPos.y,
+          size: Math.random() * 8 + 4, // Random size between 4-12px
+          opacity: 0.8
+        };
+        
+        setBubbles(prev => [...prev, newBubble]);
+        lastMousePos.current = currentPos;
+        
+        // Remove bubble after animation
+        setTimeout(() => {
+          setBubbles(prev => prev.filter(bubble => bubble.id !== newBubble.id));
+        }, 1000);
+      }
+    };
+
+    // Throttle mouse move events
+    const throttledMouseMove = (e) => {
+      if (mouseMoveTimeout.current) return;
+      
+      mouseMoveTimeout.current = setTimeout(() => {
+        handleMouseMove(e);
+        mouseMoveTimeout.current = null;
+      }, 16); // ~60fps
+    };
+
+    document.addEventListener('mousemove', throttledMouseMove);
+    
+    return () => {
+      document.removeEventListener('mousemove', throttledMouseMove);
+      if (mouseMoveTimeout.current) {
+        clearTimeout(mouseMoveTimeout.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="video-bg-container">
+      {/* Bubble trail effect */}
+      {bubbles.map(bubble => (
+        <div
+          key={bubble.id}
+          className="bubble-trail"
+          style={{
+            left: bubble.x - bubble.size / 2,
+            top: bubble.y - bubble.size / 2,
+            width: bubble.size,
+            height: bubble.size,
+            opacity: bubble.opacity
+          }}
+        />
+      ))}
       <video
         autoPlay
         loop
