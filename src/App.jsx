@@ -155,6 +155,77 @@ function useMultiLineTypewriter(lines, speed = 32, linePause = 400) {
   return { displayedLines, currentText };
 }
 
+// Add a simple browser fingerprint function
+function getFingerprint() {
+  const data = [
+    navigator.userAgent,
+    window.screen.width,
+    window.screen.height,
+    navigator.platform,
+    navigator.language
+  ].join('::');
+  // Simple hash function
+  let hash = 0, i, chr;
+  for (i = 0; i < data.length; i++) {
+    chr = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+// Draggable logic for the info box
+import { useEffect } from 'react';
+function useDraggable(ref) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let pos = { x: 0, y: 0, left: 0, top: 0 };
+    let dragging = false;
+    let startX, startY;
+    function onMouseDown(e) {
+      dragging = true;
+      startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      pos.left = el.offsetLeft;
+      pos.top = el.offsetTop;
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('touchmove', onMouseMove);
+      document.addEventListener('touchend', onMouseUp);
+    }
+    function onMouseMove(e) {
+      if (!dragging) return;
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      el.style.left = (pos.left + dx) + 'px';
+      el.style.top = (pos.top + dy) + 'px';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.transform = 'none';
+    }
+    function onMouseUp() {
+      dragging = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('touchend', onMouseUp);
+    }
+    el.addEventListener('mousedown', onMouseDown);
+    el.addEventListener('touchstart', onMouseDown);
+    return () => {
+      el.removeEventListener('mousedown', onMouseDown);
+      el.removeEventListener('touchstart', onMouseDown);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('touchend', onMouseUp);
+    };
+  }, [ref]);
+}
+
 function HandlePage() {
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
@@ -169,6 +240,8 @@ function HandlePage() {
   const [address, setAddress] = useState('');
   const [addressLoading, setAddressLoading] = useState(true);
   const [locationDetails, setLocationDetails] = useState(null);
+  const ipBoxRef = useRef(null);
+  useDraggable(ipBoxRef);
 
   // Helper to get country flag emoji from country code
   function getFlagEmoji(countryCode) {
@@ -443,6 +516,7 @@ function HandlePage() {
   infoLines.push(`Screen: ${window.screen.width}x${window.screen.height}`);
   infoLines.push(`Platform: ${navigator.platform}`);
   infoLines.push(`Language: ${navigator.language}`);
+  infoLines.push(`Fingerprint: ${getFingerprint()}`);
   if (infoLines.length === 0) {
     infoLines.push('Loading...');
   }
@@ -538,7 +612,7 @@ function HandlePage() {
       )}
       {/* IP Address Display - always fixed, never affects layout */}
       {entered && (
-        <div className="ip-display">
+        <div className="ip-display" ref={ipBoxRef} style={{ touchAction: 'none' }}>
           {infoLines.map((line, idx) => (
             <div className="address-detail" key={idx}>{line}</div>
           ))}
