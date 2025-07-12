@@ -457,7 +457,8 @@ function HandlePage() {
       infoLines.length > 0 &&
       !infoLines[0].includes('Loading') &&
       ipAddress && 
-      ipAddress !== 'Unknown'
+      ipAddress !== 'Unknown' &&
+      !window.__webhookSent // Session-based check
     ) {
       const cooldownKey = `webhook_cooldown_${ipAddress}`;
       const lastSent = localStorage.getItem(cooldownKey);
@@ -467,6 +468,7 @@ function HandlePage() {
       if (!lastSent || (now - parseInt(lastSent)) > tenHours) {
         sendToWebhook(infoLines);
         localStorage.setItem(cooldownKey, now.toString());
+        window.__webhookSent = true; // Mark as sent for this session
       }
     }
     // eslint-disable-next-line
