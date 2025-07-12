@@ -243,7 +243,7 @@ function HandlePage() {
         muted
         playsInline
         className={entered ? 'background-video' : 'background-video blurred'}
-        src={base + 'video.mp4'}
+        src={'/video.mp4'}
         onEnded={e => { e.target.currentTime = 0; e.target.play(); }}
       />
       {!entered && (
