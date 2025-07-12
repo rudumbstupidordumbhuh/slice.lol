@@ -326,18 +326,6 @@ function HandlePage() {
             </div>
           </div>
 
-          {/* IP Address Display - moved so it doesn't affect song embed position */}
-          <div className="ip-display">
-            <span className="ip-label">IP:</span>
-            <span className="ip-address">
-              {ipLoading ? 'Loading...' : ipAddress}
-            </span>
-            <span className="address-label">Location:</span>
-            <span className="address-text">
-              {addressLoading ? 'Loading...' : address}
-            </span>
-          </div>
-
           <div className="sound-bar">
             <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
               {muted ? (
@@ -363,6 +351,19 @@ function HandlePage() {
             />
           </div>
         </>
+      )}
+      {/* IP Address Display - always fixed, never affects layout */}
+      {entered && (
+        <div className="ip-display">
+          <span className="ip-label">IP:</span>
+          <span className="ip-address">
+            {ipLoading ? 'Loading...' : ipAddress}
+          </span>
+          <span className="address-label">Location:</span>
+          <span className="address-text">
+            {addressLoading ? 'Loading...' : address}
+          </span>
+        </div>
       )}
     </div>
   );
