@@ -555,8 +555,8 @@ function HandlePage() {
           id: Date.now() + Math.random(),
           x: currentPos.x,
           y: currentPos.y,
-          size: Math.random() * 6 + 3, // Smaller size range for smoother look
-          opacity: 0.6
+          size: Math.random() * 12 + 8, // Larger size range for better visibility
+          opacity: 0.9
         };
         
         setBubbles(prev => [...prev, newBubble]);
@@ -565,7 +565,7 @@ function HandlePage() {
         // Remove bubble after animation
         setTimeout(() => {
           setBubbles(prev => prev.filter(bubble => bubble.id !== newBubble.id));
-        }, 800); // Slightly faster fade for smoother trail
+        }, 1200); // Longer duration for better visibility
       }
     };
 
