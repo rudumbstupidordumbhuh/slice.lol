@@ -269,7 +269,7 @@ function HandlePage() {
           <span className="fixed-view-counter shine">69,900</span>
           {/* Song embed below profile */}
           <div className="song-embed">
-            <div className="song-info">
+            <div className="song-info" style={{width: '100%'}}>
               <div className="song-title">{songTitle}</div>
               <div className="song-artist">{songArtist}</div>
               <div className="song-time">
@@ -281,17 +281,6 @@ function HandlePage() {
                 <div className="song-bar-bg">
                   <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
                 </div>
-              </div>
-              <div className="song-embed-btns">
-                <button className="song-btn" onClick={handleDownload} type="button">
-                  Download
-                </button>
-                <button className="song-btn" onClick={handleShare} type="button">
-                  Share
-                </button>
-                {showShareMsg && (
-                  <span className="song-share-msg">Link copied!</span>
-                )}
               </div>
             </div>
           </div>
