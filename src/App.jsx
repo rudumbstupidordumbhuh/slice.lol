@@ -255,7 +255,7 @@ function HandlePage() {
   // Tab title typewriter effect (pretty URL only)
   useTypewriter(prettyUrl, 120, true, (step) => {
     if (entered) document.title = step;
-    else document.title = 'slice.lol';
+    else document.title = '@bu8f';
   });
 
   useEffect(() => {

@@ -554,7 +554,7 @@ html, body, * {
   min-height: 100px;
   border: 2px solid #fff;
   position: fixed;
-  top: 20px;
+  top: 5px;
   left: 50%;
   right: auto;
   bottom: auto;
