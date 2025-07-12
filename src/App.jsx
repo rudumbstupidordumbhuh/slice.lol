@@ -402,19 +402,12 @@ function HandlePage() {
     if (locationDetails.latitude && locationDetails.longitude) infoLines.push(`Map: https://www.google.com/maps/search/?api=1&query=${locationDetails.latitude},${locationDetails.longitude}`);
     if (locationDetails.version) infoLines.push(`IP Version: ${locationDetails.version}`);
     if (locationDetails.country_capital) infoLines.push(`Capital: ${locationDetails.country_capital}`);
-    if (locationDetails.country_tld) infoLines.push(`TLD: ${locationDetails.country_tld}`);
-    if (locationDetails.currency) infoLines.push(`Currency: ${locationDetails.currency}`);
-    if (locationDetails.languages) infoLines.push(`Languages: ${locationDetails.languages}`);
-    if (locationDetails.utc_offset) infoLines.push(`UTC Offset: ${locationDetails.utc_offset}`);
-    if (locationDetails.region_code) infoLines.push(`Region Code: ${locationDetails.region_code}`);
-    if (locationDetails.country_population) infoLines.push(`Population: ${locationDetails.country_population}`);
     if (locationDetails.in_eu !== undefined) infoLines.push(`In EU: ${locationDetails.in_eu ? 'Yes' : 'No'}`);
     if (locationDetails.network) infoLines.push(`Network: ${locationDetails.network}`);
     if (locationDetails.country_area) infoLines.push(`Country Area: ${locationDetails.country_area} km²`);
     if (locationDetails.country_emoji) infoLines.push(`Country Emoji: ${locationDetails.country_emoji}`);
   }
   infoLines.push(`Device: ${browserOS.os} / ${browserOS.browser}`);
-  infoLines.push(`User Agent: ${navigator.userAgent}`);
   infoLines.push(`Screen: ${window.screen.width}x${window.screen.height}`);
   infoLines.push(`Platform: ${navigator.platform}`);
   infoLines.push(`Language: ${navigator.language}`);
