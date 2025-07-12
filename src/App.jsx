@@ -422,8 +422,6 @@ function HandlePage() {
     infoLines.push('Loading...');
   }
 
-  const { displayedLines, currentText } = useMultiLineTypewriter(infoLines, 32, 500);
-
   return (
     <div className="video-bg-container">
       <video
@@ -504,12 +502,9 @@ function HandlePage() {
       {/* IP Address Display - always fixed, never affects layout */}
       {entered && (
         <div className="ip-display">
-          {displayedLines.map((line, idx) => (
+          {infoLines.map((line, idx) => (
             <div className="address-detail" key={idx}>{line}</div>
           ))}
-          {currentText && (
-            <div className="address-detail typewriter-active">{currentText}<span className="typewriter-cursor">|</span></div>
-          )}
         </div>
       )}
     </div>
