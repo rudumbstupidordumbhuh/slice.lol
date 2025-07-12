@@ -175,7 +175,6 @@ function getFingerprint() {
 }
 
 // Draggable logic for the info box
-import { useEffect } from 'react';
 function useDraggable(ref) {
   useEffect(() => {
     const el = ref.current;
