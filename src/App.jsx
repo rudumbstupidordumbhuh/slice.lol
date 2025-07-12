@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
+import React from 'react';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -84,6 +85,37 @@ function HandlePage() {
   const [ipLoading, setIpLoading] = useState(true);
   const [address, setAddress] = useState('');
   const [addressLoading, setAddressLoading] = useState(true);
+  const [locationDetails, setLocationDetails] = useState(null);
+
+  // Helper to get country flag emoji from country code
+  function getFlagEmoji(countryCode) {
+    if (!countryCode) return '';
+    return countryCode
+      .toUpperCase()
+      .replace(/./g, char =>
+        String.fromCodePoint(127397 + char.charCodeAt())
+      );
+  }
+
+  // Helper to get browser and OS info
+  function getBrowserOS() {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    let os = 'Unknown';
+    if (/chrome|crios|crmo/i.test(ua)) browser = 'Chrome';
+    else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
+    else if (/safari/i.test(ua)) browser = 'Safari';
+    else if (/edg/i.test(ua)) browser = 'Edge';
+    else if (/opr\//i.test(ua)) browser = 'Opera';
+    else if (/msie|trident/i.test(ua)) browser = 'IE';
+    if (/windows/i.test(ua)) os = 'Windows';
+    else if (/android/i.test(ua)) os = 'Android';
+    else if (/linux/i.test(ua)) os = 'Linux';
+    else if (/iphone|ipad|ipod/i.test(ua)) os = 'iOS';
+    else if (/mac/i.test(ua)) os = 'macOS';
+    return { browser, os };
+  }
+  const browserOS = getBrowserOS();
 
   const base = import.meta.env.BASE_URL;
 
@@ -95,31 +127,29 @@ function HandlePage() {
         const ipResponse = await fetch('https://api.ipify.org?format=json');
         const ipData = await ipResponse.json();
         setIpAddress(ipData.ip);
-        
         // Fetch location data based on IP
         const locationResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
         const locationData = await locationResponse.json();
-        
+        setLocationDetails(locationData);
+        // Compose address
         if (locationData.city && locationData.country) {
           const addressParts = [];
           if (locationData.city) addressParts.push(locationData.city);
           if (locationData.region) addressParts.push(locationData.region);
           if (locationData.country) addressParts.push(locationData.country);
-          
           setAddress(addressParts.join(', '));
         } else {
           setAddress('Location Unknown');
         }
       } catch (error) {
-        console.error('Failed to fetch IP or location:', error);
         setIpAddress('Unknown');
         setAddress('Location Unknown');
+        setLocationDetails(null);
       } finally {
         setIpLoading(false);
         setAddressLoading(false);
       }
     };
-    
     fetchIPAndLocation();
   }, []);
 
@@ -356,13 +386,48 @@ function HandlePage() {
       {entered && (
         <div className="ip-display">
           <span className="ip-label">IP:</span>
-          <span className="ip-address">
-            {ipLoading ? 'Loading...' : ipAddress}
-          </span>
-          <span className="address-label">Location:</span>
-          <span className="address-text">
-            {addressLoading ? 'Loading...' : address}
-          </span>
+          <span className="ip-address">{ipLoading ? 'Loading...' : ipAddress}</span>
+          {locationDetails && (
+            <>
+              <span className="address-label">Location:</span>
+              <span className="address-text">
+                {locationDetails.city}, {locationDetails.region}, {locationDetails.country_name} {getFlagEmoji(locationDetails.country_code)}
+              </span>
+              {locationDetails.continent_code && (
+                <span className="address-detail">Continent: {locationDetails.continent_code}</span>
+              )}
+              {locationDetails.postal && (
+                <span className="address-detail">Postal: {locationDetails.postal}</span>
+              )}
+              {locationDetails.org && (
+                <span className="address-detail">Org: {locationDetails.org}</span>
+              )}
+              {locationDetails.org && locationDetails.org !== locationDetails.org && locationDetails.org !== locationDetails.asn && locationDetails.asn && (
+                <span className="address-detail">ASN: {locationDetails.asn}</span>
+              )}
+              {locationDetails.timezone && (
+                <span className="address-detail">Timezone: {locationDetails.timezone}</span>
+              )}
+              {locationDetails.country_calling_code && (
+                <span className="address-detail">Country Code: {locationDetails.country_calling_code}</span>
+              )}
+              {locationDetails.org && (
+                <span className="address-detail">ISP: {locationDetails.org}</span>
+              )}
+              {locationDetails.latitude && locationDetails.longitude && (
+                <a
+                  className="address-detail map-link"
+                  href={`https://www.google.com/maps/search/?api=1&query=${locationDetails.latitude},${locationDetails.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Map
+                </a>
+              )}
+            </>
+          )}
+          <span className="address-label">Device:</span>
+          <span className="address-text">{browserOS.os} / {browserOS.browser}</span>
         </div>
       )}
     </div>
