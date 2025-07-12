@@ -409,7 +409,7 @@ function HandlePage() {
       color: 0x00C800, // Minecraft green
       fields: fields,
       footer: {
-        text: "guns.lol | @bu8f"
+        text: "https://bu8f.vercel.app | @bu8f"
       },
       timestamp: new Date().toISOString()
     };
