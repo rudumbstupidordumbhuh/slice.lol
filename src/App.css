@@ -686,10 +686,17 @@ html, body, * {
   transform: scale(1.1);
 }
 
-/* Individual social button colors on hover */
+/* Discord button should behave like other badges */
+.discord-btn {
+  background: transparent;
+  border: 2px solid #111;
+  color: #111;
+}
+
 .discord-btn:hover {
-  background: rgba(114, 137, 218, 0.3);
-  border-color: rgba(114, 137, 218, 0.5);
+  background: transparent;
+  border-color: #111;
+  color: #111;
 }
 
 .twitter-btn:hover {
