@@ -554,9 +554,11 @@ html, body, * {
   min-height: 100px;
   border: 2px solid #fff;
   position: fixed;
-  top: 50%;
-  right: -100px;
-  transform: translateY(-50%);
+  top: 20px;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
   background: rgba(0,0,0,0.32);
   padding: 12px 16px;
   border-radius: 12px;
