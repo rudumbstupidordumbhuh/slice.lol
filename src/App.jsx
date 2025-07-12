@@ -617,6 +617,28 @@ function HandlePage() {
           ))}
         </div>
       )}
+
+      {/* Social Media Links */}
+      {entered && (
+        <div className="social-links">
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText('bu8f');
+              // Optional: Show a brief notification
+              const btn = document.querySelector('.discord-btn');
+              const originalText = btn.innerHTML;
+              btn.innerHTML = 'Copied!';
+              setTimeout(() => {
+                btn.innerHTML = originalText;
+              }, 1000);
+            }}
+            className="social-btn discord-btn"
+            title="Copy Discord username: bu8f"
+          >
+            bu8f
+          </button>
+        </div>
+      )}
     </div>
   );
 }
