@@ -260,10 +260,10 @@ function HandlePage() {
             <span className="typewriter-text">{typed}</span>
           </div>
           <div className="overlay-content">
-            <span className="centered-bg-text slide-up shine">{handle}</span>
+            <span className="centered-bg-text slide-up shine">@bu8f</span>
             <div className="badge-container column-badges">
               <span className="owner-badge small-badge" tabIndex="0">🛠️<span className="badge-tooltip">owner</span></span>
-              <span className="owner-badge small-badge" tabIndex="0">🦋<span className="badge-tooltip">fierce</span></span>
+              <span className="owner-badge small-badge" tabIndex="0">💀<span className="badge-tooltip">sybau</span></span>
             </div>
           </div>
           <span className="fixed-view-counter shine">69,900</span>
