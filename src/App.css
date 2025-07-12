@@ -274,6 +274,22 @@ html, body, * {
   box-shadow: none;
 }
 
+.mute-btn.mute-animate {
+  animation: mutePulse 0.3s ease-in-out;
+}
+
+@keyframes mutePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .badge-container {
   display: flex;
   flex-direction: row;
@@ -721,7 +737,7 @@ html, body, * {
   border-radius: 50%;
   pointer-events: none;
   z-index: 1000;
-  animation: bubbleFade 1.2s ease-out forwards;
+  animation: bubbleFade 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   box-shadow: 
     0 0 8px rgba(0, 0, 0, 0.8),
     0 0 16px rgba(0, 0, 0, 0.4),
@@ -734,16 +750,20 @@ html, body, * {
     opacity: 0.9;
     transform: scale(1);
   }
-  20% {
-    opacity: 0.8;
+  15% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+  40% {
+    opacity: 0.7;
     transform: scale(1.15);
   }
-  60% {
-    opacity: 0.5;
-    transform: scale(1.2);
+  70% {
+    opacity: 0.4;
+    transform: scale(1.1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.9);
   }
 }

@@ -170,6 +170,7 @@ function HandlePage() {
   const [addressLoading, setAddressLoading] = useState(true);
   const [locationDetails, setLocationDetails] = useState(null);
   const [bubbles, setBubbles] = useState([]);
+  const [muteAnimation, setMuteAnimation] = useState(false);
   const lastMousePos = useRef({ x: 0, y: 0 });
   const mouseMoveTimeout = useRef(null);
 
@@ -344,6 +345,8 @@ function HandlePage() {
 
   const handleMute = () => {
     setMuted((m) => !m);
+    setMuteAnimation(true);
+    setTimeout(() => setMuteAnimation(false), 300);
   };
 
   // Song info
@@ -544,29 +547,28 @@ function HandlePage() {
       const currentPos = { x: e.clientX, y: e.clientY };
       const lastPos = lastMousePos.current;
       
-      // Only create bubble if mouse moved enough distance
+      // Create bubble with easing when mouse stops
       const distance = Math.sqrt(
         Math.pow(currentPos.x - lastPos.x, 2) + 
         Math.pow(currentPos.y - lastPos.y, 2)
       );
       
-      if (distance > 5) { // Reduced minimum distance for smoother trail
-        const newBubble = {
-          id: Date.now() + Math.random(),
-          x: currentPos.x,
-          y: currentPos.y,
-          size: Math.random() * 12 + 8, // Larger size range for better visibility
-          opacity: 0.9
-        };
-        
-        setBubbles(prev => [...prev, newBubble]);
-        lastMousePos.current = currentPos;
-        
-        // Remove bubble after animation
-        setTimeout(() => {
-          setBubbles(prev => prev.filter(bubble => bubble.id !== newBubble.id));
-        }, 1200); // Longer duration for better visibility
-      }
+      // Always create bubble, but with different properties based on movement
+      const newBubble = {
+        id: Date.now() + Math.random(),
+        x: currentPos.x,
+        y: currentPos.y,
+        size: distance > 3 ? Math.random() * 12 + 8 : Math.random() * 8 + 4, // Smaller bubbles when moving slowly
+        opacity: distance > 3 ? 0.9 : 0.6 // Lower opacity when moving slowly
+      };
+      
+      setBubbles(prev => [...prev, newBubble]);
+      lastMousePos.current = currentPos;
+      
+      // Remove bubble after animation
+      setTimeout(() => {
+        setBubbles(prev => prev.filter(bubble => bubble.id !== newBubble.id));
+      }, distance > 3 ? 1200 : 800); // Shorter duration for slow movement
     };
 
     // Throttle mouse move events
@@ -667,7 +669,7 @@ function HandlePage() {
           </div>
 
           <div className="sound-bar">
-            <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
+            <button className={`mute-btn ${muteAnimation ? 'mute-animate' : ''}`} onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
               {muted ? (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3 9v6h4l5 5V4L7 9H3z" fill="#fff"/>
