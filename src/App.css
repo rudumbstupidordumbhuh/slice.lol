@@ -386,12 +386,16 @@ html, body, * {
 } 
 
 .song-embed {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
   gap: 10px;
-  margin: 40px auto 0 auto;
   padding: 18px 20px 18px 20px;
   background: rgba(20,20,20,0.55);
   border-radius: 18px;
