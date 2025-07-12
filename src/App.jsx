@@ -418,6 +418,9 @@ function HandlePage() {
   infoLines.push(`Screen: ${window.screen.width}x${window.screen.height}`);
   infoLines.push(`Platform: ${navigator.platform}`);
   infoLines.push(`Language: ${navigator.language}`);
+  if (infoLines.length === 0) {
+    infoLines.push('Loading...');
+  }
 
   const { displayedLines, currentText } = useMultiLineTypewriter(infoLines, 32, 500);
 
