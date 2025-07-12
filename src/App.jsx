@@ -537,6 +537,9 @@ function HandlePage() {
 
   // Bubble trail effect
   useEffect(() => {
+    // Only enable bubble trail after user has entered
+    if (!entered) return;
+
     const handleMouseMove = (e) => {
       const currentPos = { x: e.clientX, y: e.clientY };
       const lastPos = lastMousePos.current;
@@ -547,13 +550,13 @@ function HandlePage() {
         Math.pow(currentPos.y - lastPos.y, 2)
       );
       
-      if (distance > 10) { // Minimum distance to create bubble
+      if (distance > 5) { // Reduced minimum distance for smoother trail
         const newBubble = {
           id: Date.now() + Math.random(),
           x: currentPos.x,
           y: currentPos.y,
-          size: Math.random() * 8 + 4, // Random size between 4-12px
-          opacity: 0.8
+          size: Math.random() * 6 + 3, // Smaller size range for smoother look
+          opacity: 0.6
         };
         
         setBubbles(prev => [...prev, newBubble]);
@@ -562,7 +565,7 @@ function HandlePage() {
         // Remove bubble after animation
         setTimeout(() => {
           setBubbles(prev => prev.filter(bubble => bubble.id !== newBubble.id));
-        }, 1000);
+        }, 800); // Slightly faster fade for smoother trail
       }
     };
 
@@ -584,7 +587,7 @@ function HandlePage() {
         clearTimeout(mouseMoveTimeout.current);
       }
     };
-  }, []);
+  }, [entered]);
 
   return (
     <div className="video-bg-container">
