@@ -333,7 +333,7 @@ export default function App() {
       loop
       muted
       playsInline
-      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0, border: '5px solid red' }}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
       src="/video.mp4"
     />
   );
