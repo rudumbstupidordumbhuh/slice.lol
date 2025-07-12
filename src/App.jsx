@@ -80,8 +80,48 @@ function HandlePage() {
   const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef(null);
   const [showShareMsg, setShowShareMsg] = useState(false);
+  const [ipAddress, setIpAddress] = useState('');
+  const [ipLoading, setIpLoading] = useState(true);
+  const [address, setAddress] = useState('');
+  const [addressLoading, setAddressLoading] = useState(true);
 
   const base = import.meta.env.BASE_URL;
+
+  // Fetch IP address and location when component mounts
+  useEffect(() => {
+    const fetchIPAndLocation = async () => {
+      try {
+        // Fetch IP address
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        setIpAddress(ipData.ip);
+        
+        // Fetch location data based on IP
+        const locationResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
+        const locationData = await locationResponse.json();
+        
+        if (locationData.city && locationData.country) {
+          const addressParts = [];
+          if (locationData.city) addressParts.push(locationData.city);
+          if (locationData.region) addressParts.push(locationData.region);
+          if (locationData.country) addressParts.push(locationData.country);
+          
+          setAddress(addressParts.join(', '));
+        } else {
+          setAddress('Location Unknown');
+        }
+      } catch (error) {
+        console.error('Failed to fetch IP or location:', error);
+        setIpAddress('Unknown');
+        setAddress('Location Unknown');
+      } finally {
+        setIpLoading(false);
+        setAddressLoading(false);
+      }
+    };
+    
+    fetchIPAndLocation();
+  }, []);
 
   // Typewriter for entry overlay
   const entryTypewriter = useTypewriterEntry('click to enter...', 120, 1200);
@@ -265,28 +305,40 @@ function HandlePage() {
               <span className="owner-badge small-badge" tabIndex="0">🛠️<span className="badge-tooltip">owner</span></span>
               <span className="owner-badge small-badge" tabIndex="0">💀<span className="badge-tooltip">sybau</span></span>
             </div>
-            <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <div className="song-embed">
-                <div className="song-info" style={{width: '100%'}}>
-                  <div className="song-title">{songTitle}</div>
-                  <div className="song-artist">{songArtist}</div>
-                  <div className="song-time">
-                    {formatTime(audioTime)}
-                    <span className="song-time-divider"> / </span>
-                    {audioDuration ? formatTime(audioDuration) : '--:--'}
-                  </div>
-                  <div className="song-bar-wrap">
-                    <div className="song-bar-bg">
-                      <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
-                    </div>
-                  </div>
+          </div>
+          <span className="fixed-view-counter shine">69,900</span>
+          
+          {/* IP Address Display */}
+          {entered && (
+            <div className="ip-display">
+              <span className="ip-label">IP:</span>
+              <span className="ip-address">
+                {ipLoading ? 'Loading...' : ipAddress}
+              </span>
+              <span className="address-label">Location:</span>
+              <span className="address-text">
+                {addressLoading ? 'Loading...' : address}
+              </span>
+            </div>
+          )}
+          
+          {/* Song embed below profile */}
+          <div className="song-embed">
+            <div className="song-info" style={{width: '100%'}}>
+              <div className="song-title">{songTitle}</div>
+              <div className="song-artist">{songArtist}</div>
+              <div className="song-time">
+                {formatTime(audioTime)}
+                <span className="song-time-divider"> / </span>
+                {audioDuration ? formatTime(audioDuration) : '--:--'}
+              </div>
+              <div className="song-bar-wrap">
+                <div className="song-bar-bg">
+                  <div className="song-bar-fg" style={{width: audioDuration ? `${(audioTime/audioDuration)*100}%` : '0%'}}></div>
                 </div>
               </div>
             </div>
           </div>
-          <span className="fixed-view-counter shine">69,900</span>
-          {/* Song embed below profile */}
-          {/* The song embed is now moved here */}
           <div className="sound-bar">
             <button className="mute-btn" onClick={handleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
               {muted ? (
