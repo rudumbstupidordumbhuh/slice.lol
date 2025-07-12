@@ -689,13 +689,13 @@ html, body, * {
 /* Discord button should behave like other badges */
 .discord-btn {
   background: transparent;
-  border: 2px solid #111;
+  border: none;
   color: #111;
 }
 
 .discord-btn:hover {
   background: transparent;
-  border-color: #111;
+  border: none;
   color: #111;
 }
 
