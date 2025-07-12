@@ -388,7 +388,7 @@ html, body, * {
 .song-embed {
   position: fixed;
   left: 50%;
-  bottom: -700px;
+  bottom: -600px;
   transform: translateX(-50%);
   z-index: 20;
   display: flex;
@@ -551,11 +551,11 @@ html, body, * {
 
 /* IP Address Display */
 .ip-display {
-  min-height: 60px;
+  min-height: 100px;
   border: 2px solid #fff;
   position: fixed;
   top: 50%;
-  right: 20px;
+  right: -100px;
   transform: translateY(-50%);
   background: rgba(0,0,0,0.32);
   padding: 12px 16px;
