@@ -454,7 +454,7 @@ html, body, * {
 .song-bar-bg {
   width: 100%;
   height: 13px;
-  background: linear-gradient(90deg, #222 60%, #444 100%);
+  background: linear-gradient(90deg, #000 0%, #222 100%);
   border-radius: 7px;
   overflow: hidden;
   box-shadow: 0 2px 8px #000a;
