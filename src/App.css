@@ -644,7 +644,7 @@ html, body, * {
 /* Social Media Links */
 .social-links {
   position: fixed;
-  top: calc(50% + 60px);
+  top: calc(50% + 80px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -653,9 +653,9 @@ html, body, * {
 }
 
 .social-btn {
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: rgba(0,0,0,0.32);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255,255,255,0.1);
@@ -665,6 +665,8 @@ html, body, * {
   transition: all 0.3s ease;
   color: #fff;
   text-decoration: none;
+  font-size: 14px;
+  font-family: 'Minecraft Regular', 'Inter', Arial, sans-serif;
 }
 
 .social-btn:hover {
@@ -675,8 +677,8 @@ html, body, * {
 }
 
 .social-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   transition: all 0.3s ease;
 }
 
