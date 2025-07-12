@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-import React, { useEffect, useRef, useState } from 'react';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
