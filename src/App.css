@@ -387,18 +387,18 @@ html, body, * {
 
 .song-embed {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: center;
-  flex-direction: row;
-  gap: 18px;
+  gap: 10px;
   margin: 60px auto 0 auto;
-  padding: 14px 28px 14px 18px;
+  padding: 24px 32px 24px 32px;
   background: rgba(20,20,20,0.55);
   border-radius: 18px;
   box-shadow: 0 2px 12px #0007;
   max-width: 340px;
   min-width: 220px;
-  min-height: 70px;
+  min-height: 120px;
   position: relative;
 }
 .song-thumb {
@@ -412,21 +412,33 @@ html, body, * {
 .song-info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-start;
-  gap: 7px;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
 }
 .song-title {
   font-family: 'Minecraft Regular', 'Inter', Arial, sans-serif;
-  font-size: 18px;
+  font-size: 22px;
   color: #fff;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-shadow: 0 2px 8px #000a;
 }
+.song-artist {
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 16px;
+  color: #b0e0ff;
+  font-weight: 500;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px #000a;
+}
 .song-time {
   font-family: 'Inter', Arial, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   color: #e0e0e0;
   font-weight: 500;
   letter-spacing: 0.01em;
