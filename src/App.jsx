@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -70,6 +70,90 @@ function useTypewriterEntry(text, speed = 120, pause = 1200) {
     };
   }, [text, speed, pause]);
   return displayed;
+}
+
+function useMultiLineTypewriter(lines, speed = 32, linePause = 400) {
+  const [displayedLines, setDisplayedLines] = useState([]);
+  const [currentLine, setCurrentLine] = useState(0);
+  const [currentText, setCurrentText] = useState('');
+
+  useEffect(() => {
+    setDisplayedLines([]);
+    setCurrentLine(0);
+    setCurrentText('');
+    if (!lines || lines.length === 0) return;
+    let cancelled = false;
+    let timeout;
+    function typeLine(lineIdx) {
+      if (cancelled) return;
+      const line = lines[lineIdx] || '';
+      let i = 0;
+      function typeChar() {
+        if (cancelled) return;
+        setCurrentText(line.slice(0, i));
+        if (i <= line.length) {
+          timeout = setTimeout(() => {
+            i++;
+            typeChar();
+          }, speed);
+        } else {
+          setDisplayedLines(prev => [...prev, line]);
+          setCurrentText('');
+          if (lineIdx + 1 < lines.length) {
+            timeout = setTimeout(() => {
+              setCurrentLine(lineIdx + 1);
+            }, linePause);
+          }
+        }
+      }
+      typeChar();
+    }
+    typeLine(0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+    // eslint-disable-next-line
+  }, [lines, speed, linePause]);
+
+  useEffect(() => {
+    if (currentLine > 0 && currentLine < lines.length) {
+      let cancelled = false;
+      let timeout;
+      function typeLine(lineIdx) {
+        if (cancelled) return;
+        const line = lines[lineIdx] || '';
+        let i = 0;
+        function typeChar() {
+          if (cancelled) return;
+          setCurrentText(line.slice(0, i));
+          if (i <= line.length) {
+            timeout = setTimeout(() => {
+              i++;
+              typeChar();
+            }, speed);
+          } else {
+            setDisplayedLines(prev => [...prev, line]);
+            setCurrentText('');
+            if (lineIdx + 1 < lines.length) {
+              timeout = setTimeout(() => {
+                setCurrentLine(lineIdx + 1);
+              }, linePause);
+            }
+          }
+        }
+        typeChar();
+      }
+      typeLine(currentLine);
+      return () => {
+        cancelled = true;
+        clearTimeout(timeout);
+      };
+    }
+    // eslint-disable-next-line
+  }, [currentLine]);
+
+  return { displayedLines, currentText };
 }
 
 function HandlePage() {
@@ -305,6 +389,39 @@ function HandlePage() {
     }
   }
 
+  // Compose info lines for typewriter
+  const infoLines = [];
+  infoLines.push(`IP: ${ipLoading ? 'Loading...' : ipAddress}`);
+  if (locationDetails) {
+    infoLines.push(`Location: ${locationDetails.city}, ${locationDetails.region}, ${locationDetails.country_name} ${getFlagEmoji(locationDetails.country_code)}`);
+    if (locationDetails.continent_code) infoLines.push(`Continent: ${locationDetails.continent_code}`);
+    if (locationDetails.postal) infoLines.push(`Postal: ${locationDetails.postal}`);
+    if (locationDetails.org) infoLines.push(`Org: ${locationDetails.org}`);
+    if (locationDetails.asn) infoLines.push(`ASN: ${locationDetails.asn}`);
+    if (locationDetails.timezone) infoLines.push(`Timezone: ${locationDetails.timezone}`);
+    if (locationDetails.country_calling_code) infoLines.push(`Country Code: ${locationDetails.country_calling_code}`);
+    if (locationDetails.latitude && locationDetails.longitude) infoLines.push(`Map: https://www.google.com/maps/search/?api=1&query=${locationDetails.latitude},${locationDetails.longitude}`);
+    if (locationDetails.version) infoLines.push(`IP Version: ${locationDetails.version}`);
+    if (locationDetails.country_capital) infoLines.push(`Capital: ${locationDetails.country_capital}`);
+    if (locationDetails.country_tld) infoLines.push(`TLD: ${locationDetails.country_tld}`);
+    if (locationDetails.currency) infoLines.push(`Currency: ${locationDetails.currency}`);
+    if (locationDetails.languages) infoLines.push(`Languages: ${locationDetails.languages}`);
+    if (locationDetails.utc_offset) infoLines.push(`UTC Offset: ${locationDetails.utc_offset}`);
+    if (locationDetails.region_code) infoLines.push(`Region Code: ${locationDetails.region_code}`);
+    if (locationDetails.country_population) infoLines.push(`Population: ${locationDetails.country_population}`);
+    if (locationDetails.in_eu !== undefined) infoLines.push(`In EU: ${locationDetails.in_eu ? 'Yes' : 'No'}`);
+    if (locationDetails.network) infoLines.push(`Network: ${locationDetails.network}`);
+    if (locationDetails.country_area) infoLines.push(`Country Area: ${locationDetails.country_area} km²`);
+    if (locationDetails.country_emoji) infoLines.push(`Country Emoji: ${locationDetails.country_emoji}`);
+  }
+  infoLines.push(`Device: ${browserOS.os} / ${browserOS.browser}`);
+  infoLines.push(`User Agent: ${navigator.userAgent}`);
+  infoLines.push(`Screen: ${window.screen.width}x${window.screen.height}`);
+  infoLines.push(`Platform: ${navigator.platform}`);
+  infoLines.push(`Language: ${navigator.language}`);
+
+  const { displayedLines, currentText } = useMultiLineTypewriter(infoLines, 32, 500);
+
   return (
     <div className="video-bg-container">
       <video
@@ -385,49 +502,12 @@ function HandlePage() {
       {/* IP Address Display - always fixed, never affects layout */}
       {entered && (
         <div className="ip-display">
-          <span className="ip-label">IP:</span>
-          <span className="ip-address">{ipLoading ? 'Loading...' : ipAddress}</span>
-          {locationDetails && (
-            <>
-              <span className="address-label">Location:</span>
-              <span className="address-text">
-                {locationDetails.city}, {locationDetails.region}, {locationDetails.country_name} {getFlagEmoji(locationDetails.country_code)}
-              </span>
-              {locationDetails.continent_code && (
-                <span className="address-detail">Continent: {locationDetails.continent_code}</span>
-              )}
-              {locationDetails.postal && (
-                <span className="address-detail">Postal: {locationDetails.postal}</span>
-              )}
-              {locationDetails.org && (
-                <span className="address-detail">Org: {locationDetails.org}</span>
-              )}
-              {locationDetails.org && locationDetails.org !== locationDetails.org && locationDetails.org !== locationDetails.asn && locationDetails.asn && (
-                <span className="address-detail">ASN: {locationDetails.asn}</span>
-              )}
-              {locationDetails.timezone && (
-                <span className="address-detail">Timezone: {locationDetails.timezone}</span>
-              )}
-              {locationDetails.country_calling_code && (
-                <span className="address-detail">Country Code: {locationDetails.country_calling_code}</span>
-              )}
-              {locationDetails.org && (
-                <span className="address-detail">ISP: {locationDetails.org}</span>
-              )}
-              {locationDetails.latitude && locationDetails.longitude && (
-                <a
-                  className="address-detail map-link"
-                  href={`https://www.google.com/maps/search/?api=1&query=${locationDetails.latitude},${locationDetails.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View on Map
-                </a>
-              )}
-            </>
+          {displayedLines.map((line, idx) => (
+            <div className="address-detail" key={idx}>{line}</div>
+          ))}
+          {currentText && (
+            <div className="address-detail typewriter-active">{currentText}<span className="typewriter-cursor">|</span></div>
           )}
-          <span className="address-label">Device:</span>
-          <span className="address-text">{browserOS.os} / {browserOS.browser}</span>
         </div>
       )}
     </div>

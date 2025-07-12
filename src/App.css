@@ -388,7 +388,7 @@ html, body, * {
 .song-embed {
   position: fixed;
   left: 50%;
-  bottom: 5px;
+  bottom: -10px;
   transform: translateX(-50%);
   z-index: 20;
   display: flex;
@@ -620,4 +620,19 @@ html, body, * {
   margin-top: 4px;
   display: inline-block;
   font-family: 'Minecraft Regular', 'Inter', Arial, sans-serif;
+}
+
+.typewriter-active {
+  font-family: 'Minecraft Regular', 'Inter', Arial, sans-serif;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: pre;
+}
+.typewriter-cursor {
+  display: inline-block;
+  width: 1ch;
+  color: #fff;
+  animation: blink-caret-entry 1.1s steps(1) infinite;
 }
