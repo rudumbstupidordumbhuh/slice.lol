@@ -1,0 +1,18 @@
+# Set proper MIME types
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType text/css .css
+AddType text/html .html
+
+# Enable CORS for assets
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Handle client-side routing
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L] 

@@ -350,8 +350,8 @@ function HandlePage() {
   };
 
   // Song info
-  const songTitle = 'If You Care';
-  const songArtist = 'akiaura';
+  const songTitle = 'Overseas';
+  const songArtist = 'Ken Carson';
   const songFile = 'https://cdn.discordapp.com/attachments/1393371863542923368/1393372001975930993/video.mp4?ex=6872ee4c&is=68719ccc&hm=fb3f9fbc9913e832999726aa1a57d20f4d412bc4ce50ab5b93c067a940026494&';
   const songThumb = base + 'yk.png';
 
