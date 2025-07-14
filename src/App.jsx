@@ -784,8 +784,7 @@ function App() {
   
   return <>
     <HandlePage onEnter={() => setEntered(true)} />
-    {/* Taskbar removed as requested */}
-    {/* {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />} */}
+    {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />}
   </>;
 }
 
