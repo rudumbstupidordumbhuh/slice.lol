@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
 export default function SecurityTools({ isOpen, onClose, onMinimize }) {
@@ -288,31 +289,15 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="window-overlay">
-      <div className="window-modal">
-        <div className="window-titlebar">
-          <div className="window-title">
-            <span className="window-icon">🔒</span>
-            Security Tools
-          </div>
-          <div className="window-controls">
-            <button className="window-control minimize" onClick={onMinimize}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <rect x="2" y="5" width="8" height="2" fill="currentColor"/>
-              </svg>
-            </button>
-            <button className="window-control close" onClick={onClose}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="window-content">
+    <BaseWindow
+      isOpen={isOpen}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      title="Security Tools"
+      icon="🔒"
+    >
+      <div className="window-content">
           <div className="window-tabs">
             {tabs.map(tab => (
               <button
@@ -357,15 +342,8 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
               <li><strong>AlienVault OTX:</strong> Domain/URL reputation (free)</li>
               <li><strong>URLScan.io:</strong> URL scanning (free)</li>
             </ul>
-            <p className="api-note">
-              <strong>✅ Backend Proxy:</strong> APIs now routed through backend to bypass CORS.
-            </p>
-            <p className="api-solution">
-              <strong>🚀 Ready:</strong> Run with <code>npm run start</code> to use backend proxy.
-            </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-} 
+      </BaseWindow>
+    );
+  } 

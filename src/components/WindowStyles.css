@@ -13,6 +13,11 @@
   padding: 20px;
 }
 
+.window-overlay.dragging {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
 .window-modal {
   background: linear-gradient(135deg, rgba(35, 35, 35, 0.98) 0%, rgba(25, 25, 25, 0.98) 100%);
   backdrop-filter: blur(20px);
@@ -83,20 +88,102 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.window-control::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.window-control:hover::before {
+  width: 100%;
+  height: 100%;
 }
 
 .window-control:hover {
-  background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: scale(1.1);
 }
 
 .window-control.minimize:hover {
   background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.window-control.minimize:active {
+  transform: scale(0.95);
+  background: rgba(255, 193, 7, 0.3);
 }
 
 .window-control.close:hover {
   background: rgba(220, 53, 69, 0.2);
   color: #ff6b6b;
+}
+
+.window-control.close:active {
+  transform: scale(0.95);
+  background: rgba(220, 53, 69, 0.4);
+  color: #ff4444;
+}
+
+/* Minimize animation */
+.window-modal.minimizing {
+  animation: minimizeToTaskbar 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes minimizeToTaskbar {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.1) translateY(-100vh);
+    opacity: 0;
+  }
+}
+
+/* Close animation */
+.window-modal.closing {
+  animation: closeWindow 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes closeWindow {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8) rotate(5deg);
+    opacity: 0;
+  }
+}
+
+/* Draggable window styles */
+.window-modal.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.window-modal.dragging * {
+  pointer-events: none;
+}
+
+.window-titlebar.dragging {
+  cursor: grabbing;
 }
 
 .window-content {

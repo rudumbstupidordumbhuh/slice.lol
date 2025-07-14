@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
 export default function DarkWeb({ isOpen, onClose, onMinimize }) {
@@ -163,31 +164,15 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="window-overlay">
-      <div className="window-modal">
-        <div className="window-titlebar">
-          <div className="window-title">
-            <span className="window-icon">🌑</span>
-            Dark Web
-          </div>
-          <div className="window-controls">
-            <button className="window-control minimize" onClick={onMinimize}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <rect x="2" y="5" width="8" height="2" fill="currentColor"/>
-              </svg>
-            </button>
-            <button className="window-control close" onClick={onClose}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="window-content">
+    <BaseWindow
+      isOpen={isOpen}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      title="Dark Web"
+      icon="🌑"
+    >
+      <div className="window-content">
           <div className="window-tabs">
             {tabs.map(tab => (
               <button
@@ -230,12 +215,8 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
               <li><strong>Darksearch.io:</strong> .onion site search (free)</li>
               <li><strong>Onion Lookup:</strong> Hidden service metadata (free)</li>
             </ul>
-            <p className="api-note">
-              <strong>Note:</strong> These tools search the dark web. Use responsibly and legally.
-            </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-} 
+      </BaseWindow>
+    );
+  } 

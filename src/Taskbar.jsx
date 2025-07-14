@@ -9,11 +9,13 @@ import FileExplorer from './components/FileExplorer';
 import Terminal from './components/Terminal';
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
+import SurpriseEffect from './components/SurpriseEffect';
 
 export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [showShutdownAnimation, setShowShutdownAnimation] = useState(false);
+  const [showSurpriseEffect, setShowSurpriseEffect] = useState(false);
   const [openWindows, setOpenWindows] = useState({
     securityTools: false,
     searchEngines: false,
@@ -123,6 +125,14 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     }
   };
 
+  const handleSurprise = () => {
+    setShowSurpriseEffect(true);
+  };
+
+  const handleSurpriseComplete = () => {
+    setShowSurpriseEffect(false);
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -210,12 +220,14 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
         isOpen={openWindows.fileExplorer}
         onClose={() => closeWindow('fileExplorer')}
         onMinimize={() => minimizeWindow('fileExplorer')}
+        onSurprise={handleSurprise}
       />
 
       <Terminal 
         isOpen={openWindows.terminal}
         onClose={() => closeWindow('terminal')}
         onMinimize={() => minimizeWindow('terminal')}
+        onSurprise={handleSurprise}
       />
 
       <SecurityTools 
@@ -257,6 +269,12 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       <LoginScreen 
         isVisible={showLoginScreen}
         onPowerOn={handlePowerOn}
+      />
+
+      {/* Surprise Effect */}
+      <SurpriseEffect 
+        isActive={showSurpriseEffect}
+        onComplete={handleSurpriseComplete}
       />
     </>
   );

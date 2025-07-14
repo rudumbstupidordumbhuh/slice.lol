@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
-export default function FileExplorer({ isOpen, onClose, onMinimize }) {
+export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }) {
   const [currentPath, setCurrentPath] = useState('C:\\');
   const [selectedFile, setSelectedFile] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
@@ -43,7 +44,8 @@ export default function FileExplorer({ isOpen, onClose, onMinimize }) {
       children: {
         'guns.lol project': { type: 'folder', children: {} },
         'README.txt': { type: 'file', size: '2.1 KB' },
-        'screenshot.png': { type: 'file', size: '1.8 MB' }
+        'screenshot.png': { type: 'file', size: '1.8 MB' },
+        'surprise.py': { type: 'file', size: '3.2 KB' }
       }
     },
     'C:\\Users\\bu8f\\Documents': {
@@ -84,6 +86,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize }) {
     if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) return '🖼️';
     if (fileName.endsWith('.mp3') || fileName.endsWith('.wav')) return '🎵';
     if (fileName.endsWith('.mp4') || fileName.endsWith('.avi')) return '🎬';
+    if (fileName.endsWith('.py')) return '🐍';
     return '📄';
   };
 
@@ -104,31 +107,16 @@ export default function FileExplorer({ isOpen, onClose, onMinimize }) {
   const currentFolder = getCurrentFolder();
   const pathParts = currentPath.split('\\').filter(Boolean);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="window-overlay">
-      <div className="window-modal file-explorer">
-        <div className="window-titlebar">
-          <div className="window-title">
-            <span className="window-icon">📁</span>
-            File Explorer
-          </div>
-          <div className="window-controls">
-            <button className="window-control minimize" onClick={onMinimize}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <rect x="2" y="5" width="8" height="2" fill="currentColor"/>
-              </svg>
-            </button>
-            <button className="window-control close" onClick={onClose}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="window-content">
+    <BaseWindow
+      isOpen={isOpen}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      title="File Explorer"
+      icon="📁"
+      className="file-explorer"
+    >
+      <div className="window-content">
           {/* Address Bar */}
           <div className="address-bar">
             <div className="breadcrumb">
@@ -186,6 +174,8 @@ export default function FileExplorer({ isOpen, onClose, onMinimize }) {
                   onDoubleClick={() => {
                     if (file.type === 'folder') {
                       navigateTo(currentPath + name + '\\');
+                    } else if (name === 'surprise.py' && onSurprise) {
+                      onSurprise();
                     }
                   }}
                 >
@@ -209,7 +199,6 @@ export default function FileExplorer({ isOpen, onClose, onMinimize }) {
             )}
           </div>
         </div>
-      </div>
-    </div>
-  );
-} 
+      </BaseWindow>
+    );
+  } 
