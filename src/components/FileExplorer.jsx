@@ -8,7 +8,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
   const fileSystem = {
-    'C:\': {
+    'C:\\': {
       type: 'folder',
       children: {
         'Windows': { type: 'folder', children: {} },
@@ -19,7 +19,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'config.sys': { type: 'file', size: '0.8 KB' }
       }
     },
-    'C:\Users': {
+    'C:\\Users': {
       type: 'folder',
       children: {
         'bu8f': { type: 'folder', children: {} },
@@ -27,7 +27,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'Default': { type: 'folder', children: {} }
       }
     },
-    'C:\Users\bu8f': {
+    'C:\\Users\\bu8f': {
       type: 'folder',
       children: {
         'Desktop': { type: 'folder', children: {} },
@@ -47,7 +47,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'AppData': { type: 'folder', children: {} }
       }
     },
-    'C:\Users\bu8f\Desktop': {
+    'C:\\Users\\bu8f\\Desktop': {
       type: 'folder',
       children: {
         'guns.lol project': { type: 'folder', children: {} },
@@ -57,7 +57,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'ddos.py': { type: 'file', size: '2.7 KB' }
       }
     },
-    'C:\Users\bu8f\Documents': {
+    'C:\\Users\\bu8f\\Documents': {
       type: 'folder',
       children: {
         'work.docx': { type: 'file', size: '45 KB' },
@@ -65,7 +65,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'presentation.pptx': { type: 'file', size: '2.1 MB' }
       }
     },
-    'C:\Users\bu8f\Downloads': {
+    'C:\\Users\\bu8f\\Downloads': {
       type: 'folder',
       children: {
         'surprise.py': { type: 'file', size: '3.2 KB' },
