@@ -3,7 +3,7 @@ import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
 export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, onDDoS }) {
-  const [currentPath, setCurrentPath] = useState('C:\');
+  const [currentPath, setCurrentPath] = useState('C:\\');
   const [selectedFile, setSelectedFile] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
