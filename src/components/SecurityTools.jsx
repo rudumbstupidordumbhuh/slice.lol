@@ -55,7 +55,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'API-Key': 'your-urlscan-api-key' // Optional for public API
+        'API-Key': '0198068b-e9d0-7743-91b8-92554e0a774b' // Optional for public API
       },
       body: JSON.stringify({ url })
     });
@@ -80,7 +80,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
     const response = await fetch(`https://api.abuseipdb.com/api/v2/check`, {
       method: 'GET',
       headers: {
-        'Key': 'your-abuseipdb-api-key',
+        'Key': '35cd736e3b5475dd41f4b98be65dbd2e7b07eaeebca45d487198f40a4097327f8c7e21ad2e601754',
         'Accept': 'application/json'
       }
     });
@@ -134,7 +134,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
     const response = await fetch(`https://www.virustotal.com/api/v3/files/${fileHash}`, {
       method: 'GET',
       headers: {
-        'x-apikey': 'your-virustotal-api-key'
+        'x-apikey': 'd4feac2af1b31e26cf43b4368ef99cb7ab18dc049b9fc4c2062366e996a7df65'
       }
     });
 
@@ -296,7 +296,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
               <li><strong>URLScan.io:</strong> URL scanning (free)</li>
             </ul>
             <p className="api-note">
-              <strong>Note:</strong> You'll need to add your API keys to make these tools functional.
+              <strong>✅ Ready:</strong> All API keys configured and ready to use!
             </p>
           </div>
         </div>

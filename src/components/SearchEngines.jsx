@@ -72,7 +72,7 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
 
   const searchSerpstack = async (query) => {
     // Serpstack API (free tier)
-    const response = await fetch(`http://api.serpstack.com/search?access_key=your-serpstack-key&query=${encodeURIComponent(query)}`, {
+    const response = await fetch(`http://api.serpstack.com/search?access_key=472744b4b488e0d6dc0f688fad9bd777&query=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -250,7 +250,7 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
               <li><strong>DuckDuckGo:</strong> Instant answers (free)</li>
             </ul>
             <p className="api-note">
-              <strong>Note:</strong> You'll need to add your API keys to make these tools functional.
+              <strong>✅ Ready:</strong> All API keys configured and ready to use!
             </p>
           </div>
         </div>

@@ -5,9 +5,13 @@ import SearchEngines from './components/SearchEngines';
 import DarkWeb from './components/DarkWeb';
 import Vulnerabilities from './components/Vulnerabilities';
 import Aviation from './components/Aviation';
+import LoginScreen from './components/LoginScreen';
+import ShutdownAnimation from './components/ShutdownAnimation';
 
-export default function Taskbar({ isVisible }) {
+export default function Taskbar({ isVisible, onPowerOff }) {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+  const [showLoginScreen, setShowLoginScreen] = useState(false);
+  const [showShutdownAnimation, setShowShutdownAnimation] = useState(false);
   const [openWindows, setOpenWindows] = useState({
     securityTools: false,
     searchEngines: false,
@@ -75,6 +79,32 @@ export default function Taskbar({ isVisible }) {
     }));
   };
 
+  const handlePowerButton = () => {
+    setShowShutdownAnimation(true);
+    setIsStartMenuOpen(false);
+    // Close all open windows
+    setOpenWindows({
+      securityTools: false,
+      searchEngines: false,
+      darkWeb: false,
+      vulnerabilities: false,
+      aviation: false
+    });
+    
+    // Show shutdown animation for 3 seconds, then show login screen
+    setTimeout(() => {
+      setShowShutdownAnimation(false);
+      setShowLoginScreen(true);
+    }, 3000);
+  };
+
+  const handlePowerOn = () => {
+    setShowLoginScreen(false);
+    if (onPowerOff) {
+      onPowerOff(); // This will restart the main app
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -117,8 +147,8 @@ export default function Taskbar({ isVisible }) {
               <div className="user-info">
                 <div className="user-avatar">👤</div>
                 <div className="user-details">
-                  <div className="user-name">User</div>
-                  <div className="user-email">user@example.com</div>
+                  <div className="user-name">bu8f</div>
+                  <div className="user-email">https://www.bu8f.online/</div>
                 </div>
               </div>
             </div>
@@ -145,7 +175,7 @@ export default function Taskbar({ isVisible }) {
             </div>
 
             <div className="start-menu-footer">
-              <button className="power-button">
+              <button className="power-button" onClick={handlePowerButton}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 1a7 7 0 0 0-7 7v3h2V8a5 5 0 1 1 10 0v3h2V8a7 7 0 0 0-7-7z"/>
                   <path d="M7 12h2v3H7z"/>
@@ -186,6 +216,17 @@ export default function Taskbar({ isVisible }) {
         isOpen={openWindows.aviation}
         onClose={() => closeWindow('aviation')}
         onMinimize={() => minimizeWindow('aviation')}
+      />
+
+      {/* Shutdown Animation */}
+      <ShutdownAnimation 
+        isVisible={showShutdownAnimation}
+      />
+
+      {/* Login Screen */}
+      <LoginScreen 
+        isVisible={showLoginScreen}
+        onPowerOn={handlePowerOn}
       />
     </>
   );

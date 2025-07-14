@@ -47,7 +47,7 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
 
   const searchAviationStack = async (query) => {
     // Aviation Stack API (free tier - 100 requests/month)
-    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=your-aviationstack-key&search=${encodeURIComponent(query)}`, {
+    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=6dad36e1f40208970abb639991f6c37c&search=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -275,7 +275,7 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
               <li><strong>AviationAPI:</strong> FAA data (free)</li>
             </ul>
             <p className="api-note">
-              <strong>Note:</strong> You'll need to add your API keys to make these tools functional.
+              <strong>✅ Ready:</strong> All API keys configured and ready to use!
             </p>
           </div>
         </div>
