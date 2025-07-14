@@ -5,6 +5,8 @@ import SearchEngines from './components/SearchEngines';
 import DarkWeb from './components/DarkWeb';
 import Vulnerabilities from './components/Vulnerabilities';
 import Aviation from './components/Aviation';
+import FileExplorer from './components/FileExplorer';
+import Terminal from './components/Terminal';
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
 
@@ -17,10 +19,24 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     searchEngines: false,
     darkWeb: false,
     vulnerabilities: false,
-    aviation: false
+    aviation: false,
+    fileExplorer: false,
+    terminal: false
   });
 
   const tools = [
+    {
+      id: 'fileExplorer',
+      name: 'File Explorer',
+      icon: '📁',
+      description: 'Browse files and folders'
+    },
+    {
+      id: 'terminal',
+      name: 'Command Prompt',
+      icon: '💻',
+      description: 'Command line interface'
+    },
     {
       id: 'securityTools',
       name: 'Security Tools',
@@ -88,7 +104,9 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       searchEngines: false,
       darkWeb: false,
       vulnerabilities: false,
-      aviation: false
+      aviation: false,
+      fileExplorer: false,
+      terminal: false
     });
     
     // Show shutdown animation for 3 seconds, then show login screen
@@ -188,6 +206,18 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       )}
 
       {/* Individual Tool Windows */}
+      <FileExplorer 
+        isOpen={openWindows.fileExplorer}
+        onClose={() => closeWindow('fileExplorer')}
+        onMinimize={() => minimizeWindow('fileExplorer')}
+      />
+
+      <Terminal 
+        isOpen={openWindows.terminal}
+        onClose={() => closeWindow('terminal')}
+        onMinimize={() => minimizeWindow('terminal')}
+      />
+
       <SecurityTools 
         isOpen={openWindows.securityTools}
         onClose={() => closeWindow('securityTools')}

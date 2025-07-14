@@ -482,3 +482,257 @@
     padding: 12px;
   }
 } 
+
+/* File Explorer Styles */
+.file-explorer {
+  min-width: 600px;
+  min-height: 400px;
+}
+
+.address-bar {
+  background: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.breadcrumb-item {
+  background: none;
+  border: none;
+  color: #0078d4;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.breadcrumb-item:hover {
+  background: #e1f3ff;
+}
+
+.breadcrumb-separator {
+  color: #666;
+  margin: 0 2px;
+}
+
+.toolbar {
+  background: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  background: none;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-btn:hover {
+  background: #e1f3ff;
+  border-color: #0078d4;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: #ccc;
+  margin: 0 4px;
+}
+
+.file-list-container {
+  flex: 1;
+  overflow: auto;
+  background: white;
+}
+
+.file-list {
+  padding: 8px;
+}
+
+.file-list.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-list.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.file-item:hover {
+  background: #f0f8ff;
+}
+
+.file-item.selected {
+  background: #0078d4;
+  color: white;
+}
+
+.file-item.grid {
+  flex-direction: column;
+  text-align: center;
+  min-height: 80px;
+  justify-content: center;
+}
+
+.file-icon {
+  font-size: 24px;
+  margin-right: 8px;
+  min-width: 24px;
+}
+
+.file-item.grid .file-icon {
+  font-size: 32px;
+  margin-right: 0;
+  margin-bottom: 4px;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-details {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.file-item.selected .file-details {
+  color: #ccc;
+}
+
+.status-bar {
+  background: #f0f0f0;
+  border-top: 1px solid #ccc;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+}
+
+.selected-file {
+  color: #0078d4;
+  font-weight: 500;
+}
+
+/* Terminal Styles */
+.terminal {
+  min-width: 500px;
+  min-height: 300px;
+  background: #0c0c0c;
+}
+
+.terminal-content {
+  background: #0c0c0c;
+  color: #f0f0f0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-output {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  background: #0c0c0c;
+}
+
+.terminal-header {
+  color: #00ff00;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.terminal-line {
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #0c0c0c;
+  border-top: 1px solid #333;
+}
+
+.terminal-prompt {
+  color: #00ff00;
+  font-weight: bold;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #f0f0f0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  outline: none;
+  caret-color: #f0f0f0;
+}
+
+.terminal-input::placeholder {
+  color: #666;
+}
+
+/* Scrollbar styles for terminal */
+.terminal-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
