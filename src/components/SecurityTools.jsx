@@ -1,29 +1,19 @@
 import { useState } from 'react';
-import './SecurityTools.css';
-import React from 'react'; // Added missing import for React
+import './WindowStyles.css';
 
-export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+export default function SecurityTools({ isOpen, onClose, onMinimize }) {
+  const [activeTab, setActiveTab] = useState('url');
   const [input, setInput] = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const tabs = [
-    { id: 'url', name: 'URL Scanner', icon: '🔗', category: 'security' },
-    { id: 'ip', name: 'IP Reputation', icon: '🌐', category: 'security' },
-    { id: 'domain', name: 'Domain Check', icon: '🏠', category: 'security' },
-    { id: 'file', name: 'File Analysis', icon: '📁', category: 'security' },
-    { id: 'search', name: 'Search Engines', icon: '🔍', category: 'search' },
-    { id: 'darkweb', name: 'Dark Web', icon: '🌑', category: 'darkweb' },
-    { id: 'cve', name: 'Vulnerabilities', icon: '🛡️', category: 'security' },
-    { id: 'aviation', name: 'Aviation', icon: '✈️', category: 'aviation' }
+    { id: 'url', name: 'URL Scanner', icon: '🔗' },
+    { id: 'ip', name: 'IP Reputation', icon: '🌐' },
+    { id: 'domain', name: 'Domain Check', icon: '🏠' },
+    { id: 'file', name: 'File Analysis', icon: '📁' }
   ];
-
-  // Update active tab when defaultTab changes
-  React.useEffect(() => {
-    setActiveTab(defaultTab);
-  }, [defaultTab]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,18 +37,6 @@ export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
           break;
         case 'file':
           result = await analyzeFile(input);
-          break;
-        case 'search':
-          result = await searchWeb(input);
-          break;
-        case 'darkweb':
-          result = await searchDarkWeb(input);
-          break;
-        case 'cve':
-          result = await searchVulnerabilities(input);
-          break;
-        case 'aviation':
-          result = await searchAviation(input);
           break;
         default:
           throw new Error('Invalid tab');
@@ -178,106 +156,6 @@ export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
     };
   };
 
-  const searchWeb = async (query) => {
-    // Memex Marginalia API (free)
-    const response = await fetch(`https://memex.marginalia.nu/search?query=${encodeURIComponent(query)}&count=5`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Web search failed');
-    }
-
-    const data = await response.json();
-    return {
-      type: 'search',
-      data: {
-        query: query,
-        results: data.results || [],
-        totalResults: data.totalResults || 0,
-        searchEngine: 'Memex Marginalia'
-      }
-    };
-  };
-
-  const searchDarkWeb = async (query) => {
-    // Darksearch.io API (free)
-    const response = await fetch(`https://darksearch.io/api/search?query=${encodeURIComponent(query)}&page=1`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Dark web search failed');
-    }
-
-    const data = await response.json();
-    return {
-      type: 'darkweb',
-      data: {
-        query: query,
-        results: data.data || [],
-        totalResults: data.total || 0,
-        searchEngine: 'Darksearch.io'
-      }
-    };
-  };
-
-  const searchVulnerabilities = async (cveId) => {
-    // National Vulnerability Database API (free)
-    const response = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=${cveId}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Vulnerability search failed');
-    }
-
-    const data = await response.json();
-    return {
-      type: 'cve',
-      data: {
-        cveId: cveId,
-        vulnerability: data.vulnerabilities?.[0]?.cve || {},
-        totalResults: data.totalResults || 0,
-        source: 'NVD'
-      }
-    };
-  };
-
-  const searchAviation = async (query) => {
-    // Aviation Stack API (free tier - 100 requests/month)
-    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=your-aviationstack-key&search=${encodeURIComponent(query)}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Aviation search failed');
-    }
-
-    const data = await response.json();
-    return {
-      type: 'aviation',
-      data: {
-        query: query,
-        flights: data.data || [],
-        totalResults: data.pagination?.total || 0,
-        source: 'Aviation Stack'
-      }
-    };
-  };
-
   const renderResults = () => {
     if (!results) return null;
 
@@ -328,82 +206,6 @@ export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
             <p><strong>Total Scanners:</strong> {results.data.totalScanners}</p>
           </div>
         );
-      case 'search':
-        return (
-          <div className="results">
-            <h3>Web Search Results</h3>
-            <p><strong>Query:</strong> {results.data.query}</p>
-            <p><strong>Engine:</strong> {results.data.searchEngine}</p>
-            <p><strong>Total Results:</strong> {results.data.totalResults}</p>
-            {results.data.results.length > 0 && (
-              <div className="search-results">
-                {results.data.results.slice(0, 3).map((result, index) => (
-                  <div key={index} className="search-result-item">
-                    <h4>{result.title || 'No title'}</h4>
-                    <p className="result-url">{result.url || result.link}</p>
-                    <p className="result-snippet">{result.snippet || result.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      case 'darkweb':
-        return (
-          <div className="results">
-            <h3>Dark Web Search Results</h3>
-            <p><strong>Query:</strong> {results.data.query}</p>
-            <p><strong>Engine:</strong> {results.data.searchEngine}</p>
-            <p><strong>Total Results:</strong> {results.data.totalResults}</p>
-            {results.data.results.length > 0 && (
-              <div className="search-results">
-                {results.data.results.slice(0, 3).map((result, index) => (
-                  <div key={index} className="search-result-item">
-                    <h4>{result.title || 'No title'}</h4>
-                    <p className="result-url">{result.link}</p>
-                    <p className="result-snippet">{result.snippet}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      case 'cve':
-        return (
-          <div className="results">
-            <h3>Vulnerability Results</h3>
-            <p><strong>CVE ID:</strong> {results.data.cveId}</p>
-            <p><strong>Source:</strong> {results.data.source}</p>
-            {results.data.vulnerability && (
-              <>
-                <p><strong>Description:</strong> {results.data.vulnerability.descriptions?.[0]?.value || 'No description'}</p>
-                <p><strong>Severity:</strong> {results.data.vulnerability.metrics?.cvssMetricV31?.[0]?.cvssData?.baseSeverity || 'Unknown'}</p>
-                <p><strong>Published:</strong> {results.data.vulnerability.published || 'Unknown'}</p>
-              </>
-            )}
-          </div>
-        );
-      case 'aviation':
-        return (
-          <div className="results">
-            <h3>Aviation Results</h3>
-            <p><strong>Query:</strong> {results.data.query}</p>
-            <p><strong>Source:</strong> {results.data.source}</p>
-            <p><strong>Total Flights:</strong> {results.data.totalResults}</p>
-            {results.data.flights.length > 0 && (
-              <div className="aviation-results">
-                {results.data.flights.slice(0, 3).map((flight, index) => (
-                  <div key={index} className="flight-item">
-                    <h4>Flight {flight.flight?.iata || flight.flight?.icao || 'Unknown'}</h4>
-                    <p><strong>From:</strong> {flight.departure?.airport || 'Unknown'}</p>
-                    <p><strong>To:</strong> {flight.arrival?.airport || 'Unknown'}</p>
-                    <p><strong>Status:</strong> {flight.flight_status || 'Unknown'}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
       default:
         return null;
     }
@@ -419,14 +221,6 @@ export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
         return 'Enter domain (e.g., google.com)';
       case 'file':
         return 'Enter file hash (MD5, SHA1, or SHA256)';
-      case 'search':
-        return 'Enter search query (e.g., cybersecurity news)';
-      case 'darkweb':
-        return 'Enter search query for .onion sites';
-      case 'cve':
-        return 'Enter CVE ID (e.g., CVE-2023-1234)';
-      case 'aviation':
-        return 'Enter flight number, airport code, or airline name';
       default:
         return 'Enter search term...';
     }
@@ -435,89 +229,76 @@ export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
   if (!isOpen) return null;
 
   return (
-    <div className="security-tools-overlay" onClick={onClose}>
-      <div className="security-tools-modal" onClick={e => e.stopPropagation()}>
-        <div className="security-tools-header">
-          <h2>🔧 Multi-Tool API Hub</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-
-        <div className="security-tools-tabs">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <span className="tab-icon">{tab.icon}</span>
-              {tab.name}
+    <div className="window-overlay">
+      <div className="window-modal">
+        <div className="window-titlebar">
+          <div className="window-title">
+            <span className="window-icon">🔒</span>
+            Security Tools
+          </div>
+          <div className="window-controls">
+            <button className="window-control minimize" onClick={onMinimize}>
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <rect x="2" y="5" width="8" height="2" fill="currentColor"/>
+              </svg>
             </button>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit} className="security-tools-form">
-          <div className="input-group">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={getPlaceholder()}
-              className="security-input"
-            />
-            <button type="submit" className="scan-btn" disabled={loading}>
-              {loading ? 'Searching...' : 'Search'}
+            <button className="window-control close" onClick={onClose}>
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              </svg>
             </button>
           </div>
-        </form>
+        </div>
 
-        {error && (
-          <div className="error-message">
-            {error}
+        <div className="window-content">
+          <div className="window-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                {tab.name}
+              </button>
+            ))}
           </div>
-        )}
 
-        {renderResults()}
+          <form onSubmit={handleSubmit} className="window-form">
+            <div className="input-group">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={getPlaceholder()}
+                className="window-input"
+              />
+              <button type="submit" className="scan-btn" disabled={loading}>
+                {loading ? 'Scanning...' : 'Scan'}
+              </button>
+            </div>
+          </form>
 
-        <div className="api-info">
-          <h4>📋 API Information</h4>
-          <div className="api-categories">
-            <div className="api-category">
-              <h5>🔒 Security</h5>
-              <ul>
-                <li><strong>VirusTotal:</strong> File analysis (4 req/min)</li>
-                <li><strong>AbuseIPDB:</strong> IP reputation (1000 req/day)</li>
-                <li><strong>AlienVault OTX:</strong> Domain/URL reputation (free)</li>
-                <li><strong>URLScan.io:</strong> URL scanning (free)</li>
-                <li><strong>NVD:</strong> CVE database (free)</li>
-              </ul>
+          {error && (
+            <div className="error-message">
+              {error}
             </div>
-            <div className="api-category">
-              <h5>🔍 Search</h5>
-              <ul>
-                <li><strong>Memex Marginalia:</strong> Alternative search (free)</li>
-                <li><strong>Serpstack:</strong> Google results to JSON (free)</li>
-                <li><strong>DuckDuckGo:</strong> Instant answers (free)</li>
-              </ul>
-            </div>
-            <div className="api-category">
-              <h5>🌑 Dark Web</h5>
-              <ul>
-                <li><strong>Darksearch.io:</strong> .onion site search (free)</li>
-                <li><strong>Onion Lookup:</strong> Hidden service metadata (free)</li>
-              </ul>
-            </div>
-            <div className="api-category">
-              <h5>✈️ Aviation</h5>
-              <ul>
-                <li><strong>Aviation Stack:</strong> Flight data (100 req/month)</li>
-                <li><strong>OpenSky Network:</strong> ADS-B data (free)</li>
-                <li><strong>AviationAPI:</strong> FAA data (free)</li>
-              </ul>
-            </div>
+          )}
+
+          {renderResults()}
+
+          <div className="api-info">
+            <h4>📋 API Information</h4>
+            <ul>
+              <li><strong>VirusTotal:</strong> File analysis (4 req/min)</li>
+              <li><strong>AbuseIPDB:</strong> IP reputation (1000 req/day)</li>
+              <li><strong>AlienVault OTX:</strong> Domain/URL reputation (free)</li>
+              <li><strong>URLScan.io:</strong> URL scanning (free)</li>
+            </ul>
+            <p className="api-note">
+              <strong>Note:</strong> You'll need to add your API keys to make these tools functional.
+            </p>
           </div>
-          <p className="api-note">
-            <strong>Note:</strong> You'll need to add your API keys to make these tools functional.
-          </p>
         </div>
       </div>
     </div>

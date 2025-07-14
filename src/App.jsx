@@ -776,7 +776,7 @@ function App() {
   
   return <>
     <HandlePage onEnter={() => setEntered(true)} />
-    {entered && <Taskbar />}
+    {entered && <Taskbar isVisible={entered} />}
   </>;
 }
 

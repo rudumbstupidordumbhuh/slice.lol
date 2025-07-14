@@ -1,274 +1,459 @@
 .taskbar {
   position: fixed;
-  left: 0;
   bottom: 0;
-  width: 100vw;
-  height: 60px;
-  background: linear-gradient(180deg, rgba(30, 30, 30, 0.85) 0%, rgba(20, 20, 20, 0.95) 100%);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px) saturate(1.8);
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
-  z-index: 10000;
-  padding: 0 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  animation: taskbarSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  justify-content: space-between;
+  padding: 0 10px;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes taskbarSlideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.taskbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.windows-btn {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  width: 48px;
-  height: 48px;
+.start-button {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  color: white;
 }
 
-.windows-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
-}
-
-.windows-btn:hover::before {
-  left: 100%;
-}
-
-.windows-btn:hover, .windows-btn:focus {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%);
-  border-color: rgba(255, 255, 255, 0.25);
+.start-button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.windows-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.start-button.active {
+  background: linear-gradient(135deg, rgba(0, 120, 212, 0.3) 0%, rgba(0, 120, 212, 0.2) 100%);
+  border-color: rgba(0, 120, 212, 0.5);
+}
+
+.taskbar-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.taskbar-time {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: white;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+.taskbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.system-tray {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tray-icon {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tray-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Start Menu Styles */
+.start-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 999;
 }
 
 .start-menu {
   position: fixed;
-  left: 20px;
-  bottom: 68px;
-  z-index: 10001;
-  width: 340px;
-  max-width: 95vw;
+  bottom: 40px;
+  left: 10px;
+  width: 400px;
+  max-height: 600px;
   background: linear-gradient(135deg, rgba(35, 35, 35, 0.98) 0%, rgba(25, 25, 25, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(25px) saturate(1.8);
-  animation: startMenuFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-@keyframes startMenuFadeIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px) scale(0.95); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0) scale(1); 
-  }
-}
-
-.start-menu-inner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  color: white;
   overflow: hidden;
+  animation: startMenuSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes startMenuSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .start-menu-header {
-  padding: 18px 24px 14px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 12px 12px 0 0;
-  position: relative;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.start-menu-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-}
-
-.start-menu-title {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.start-menu-content {
-  flex: 1;
-  overflow: hidden;
-}
-
-.start-menu-apps {
-  padding: 12px 0;
-  max-height: 450px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.start-menu-apps::-webkit-scrollbar {
-  width: 6px;
-}
-
-.start-menu-apps::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px 0;
-}
-
-.start-menu-apps::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%);
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.start-menu-apps::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.25) 100%);
-}
-
-.start-menu-app {
-  background: none;
-  border: none;
-  width: 100%;
-  padding: 14px 24px;
-  cursor: pointer;
+.user-info {
   display: flex;
   align-items: center;
-  gap: 14px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: left;
-  color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
 }
 
-.start-menu-app::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
-
-.start-menu-app:hover::before {
-  transform: translateX(100%);
-}
-
-.start-menu-app:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
-  transform: translateX(4px);
-}
-
-.start-menu-app:active {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
-  transform: translateX(2px);
-}
-
-.start-menu-app .app-icon {
-  font-size: 20px;
-  width: 28px;
-  height: 28px;
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #0078d4, #106ebe);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  font-size: 20px;
 }
 
-.start-menu-app:hover .app-icon {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.start-menu-app .app-name {
+.user-details {
   flex: 1;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 2px;
+}
+
+.user-email {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.start-menu-content {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.apps-section {
+  padding: 20px;
+}
+
+.apps-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.apps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-item {
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  text-align: left;
+  width: 100%;
+}
+
+.app-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.app-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.app-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-@media (max-width: 600px) {
+.app-description {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.start-menu-footer {
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.power-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.power-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Scrollbar styling for start menu */
+.start-menu-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.start-menu-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.start-menu-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.start-menu-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
   .taskbar {
     height: 50px;
-    padding: 0 8px;
+    padding: 0 15px;
   }
-  .windows-btn {
-    width: 40px;
-    height: 40px;
-    margin-right: 8px;
+
+  .start-button {
+    width: 36px;
+    height: 36px;
   }
-  .start-menu {
-    width: 98vw;
-    left: 1vw;
-    border-radius: 8px;
+
+  .taskbar-time {
+    font-size: 13px;
+    padding: 6px 10px;
   }
-  .start-menu-header {
-    padding: 14px 20px 10px 20px;
-  }
-  .start-menu-title {
-    font-size: 16px;
-  }
-  .start-menu-app {
-    padding: 12px 20px;
+
+  .tray-icon {
+    width: 28px;
+    height: 28px;
     font-size: 14px;
-    gap: 12px;
   }
-  .start-menu-app .app-icon {
+
+  .start-menu {
+    left: 15px;
+    right: 15px;
+    width: auto;
+    max-height: 70vh;
+  }
+
+  .start-menu-header {
+    padding: 15px;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
     font-size: 18px;
+  }
+
+  .user-name {
+    font-size: 15px;
+  }
+
+  .apps-section {
+    padding: 15px;
+  }
+
+  .app-item {
+    padding: 10px;
+  }
+
+  .app-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .app-name {
+    font-size: 13px;
+  }
+
+  .app-description {
+    font-size: 10px;
+  }
+
+  .start-menu-footer {
+    padding: 12px 15px;
+  }
+
+  .power-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .taskbar {
+    height: 45px;
+    padding: 0 10px;
+  }
+
+  .start-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .taskbar-time {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .tray-icon {
     width: 24px;
     height: 24px;
+    font-size: 12px;
   }
-  .start-menu-apps {
-    max-height: 400px;
+
+  .start-menu {
+    left: 10px;
+    right: 10px;
+    max-height: 75vh;
+  }
+
+  .start-menu-header {
+    padding: 12px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .user-name {
+    font-size: 14px;
+  }
+
+  .user-email {
+    font-size: 11px;
+  }
+
+  .apps-section {
+    padding: 12px;
+  }
+
+  .apps-section h3 {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .app-item {
+    padding: 8px;
+  }
+
+  .app-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .app-name {
+    font-size: 12px;
+  }
+
+  .app-description {
+    font-size: 9px;
+  }
+
+  .start-menu-footer {
+    padding: 10px 12px;
+  }
+
+  .power-button {
+    padding: 5px 8px;
+    font-size: 11px;
   }
 } 

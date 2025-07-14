@@ -1,107 +1,192 @@
 import { useState } from 'react';
-import SecurityTools from './components/SecurityTools';
 import './Taskbar.css';
+import SecurityTools from './components/SecurityTools';
+import SearchEngines from './components/SearchEngines';
+import DarkWeb from './components/DarkWeb';
+import Vulnerabilities from './components/Vulnerabilities';
+import Aviation from './components/Aviation';
 
-export default function Taskbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeApp, setActiveApp] = useState(null);
+export default function Taskbar({ isVisible }) {
+  const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+  const [openWindows, setOpenWindows] = useState({
+    securityTools: false,
+    searchEngines: false,
+    darkWeb: false,
+    vulnerabilities: false,
+    aviation: false
+  });
 
-  const apps = [
+  const tools = [
     {
-      id: 'security',
+      id: 'securityTools',
       name: 'Security Tools',
       icon: '🔒',
-      description: 'Analyze files, URLs, IPs & domains',
-      component: SecurityTools
+      description: 'URL, IP, Domain & File Analysis'
     },
     {
-      id: 'search',
+      id: 'searchEngines',
       name: 'Search Engines',
       icon: '🔍',
-      description: 'Alternative search engines',
-      component: SecurityTools
+      description: 'Alternative Search & Instant Answers'
     },
     {
-      id: 'darkweb',
+      id: 'darkWeb',
       name: 'Dark Web',
       icon: '🌑',
-      description: 'Search .onion sites',
-      component: SecurityTools
+      description: 'Onion Site Search & Lookup'
     },
     {
       id: 'vulnerabilities',
       name: 'Vulnerabilities',
       icon: '🛡️',
-      description: 'CVE database search',
-      component: SecurityTools
+      description: 'CVE Database & Exploit Tracking'
     },
     {
       id: 'aviation',
       name: 'Aviation',
       icon: '✈️',
-      description: 'Flight data & tracking',
-      component: SecurityTools
+      description: 'Flight Data & Aircraft Tracking'
     }
   ];
 
-  const handleAppClick = (app) => {
-    setActiveApp(app);
-    setMenuOpen(false);
+  const toggleStartMenu = () => {
+    setIsStartMenuOpen(!isStartMenuOpen);
   };
 
-  const closeApp = () => {
-    setActiveApp(null);
+  const openWindow = (windowId) => {
+    setOpenWindows(prev => ({
+      ...prev,
+      [windowId]: true
+    }));
+    setIsStartMenuOpen(false);
   };
+
+  const closeWindow = (windowId) => {
+    setOpenWindows(prev => ({
+      ...prev,
+      [windowId]: false
+    }));
+  };
+
+  const minimizeWindow = (windowId) => {
+    setOpenWindows(prev => ({
+      ...prev,
+      [windowId]: false
+    }));
+  };
+
+  if (!isVisible) return null;
 
   return (
     <>
       <div className="taskbar">
-        <button
-          className="windows-btn"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label="Open Start Menu"
-        >
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect x="2" y="2" width="10" height="10" fill="#fff" fillOpacity="0.8"/>
-            <rect x="16" y="2" width="10" height="10" fill="#fff" fillOpacity="0.8"/>
-            <rect x="2" y="16" width="10" height="10" fill="#fff" fillOpacity="0.8"/>
-            <rect x="16" y="16" width="10" height="10" fill="#fff" fillOpacity="0.8"/>
-          </svg>
-        </button>
-        {/* You can add more taskbar icons here later */}
+        <div className="taskbar-left">
+          <button 
+            className={`start-button ${isStartMenuOpen ? 'active' : ''}`}
+            onClick={toggleStartMenu}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 4h14v2H3V4zm0 5h14v2H3V9zm0 5h14v2H3v-2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div className="taskbar-center">
+          <div className="taskbar-time">
+            {new Date().toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            })}
+          </div>
+        </div>
+
+        <div className="taskbar-right">
+          <div className="system-tray">
+            <div className="tray-icon">📶</div>
+            <div className="tray-icon">🔋</div>
+            <div className="tray-icon">🔊</div>
+          </div>
+        </div>
       </div>
-      
-      {menuOpen && (
-        <div className="start-menu" onClick={() => setMenuOpen(false)}>
-          <div className="start-menu-inner" onClick={e => e.stopPropagation()}>
+
+      {isStartMenuOpen && (
+        <div className="start-menu-overlay" onClick={toggleStartMenu}>
+          <div className="start-menu" onClick={e => e.stopPropagation()}>
             <div className="start-menu-header">
-              <div className="start-menu-title">Start</div>
-            </div>
-            <div className="start-menu-content">
-              <div className="start-menu-apps">
-                {apps.map(app => (
-                  <button
-                    key={app.id}
-                    className="start-menu-app"
-                    onClick={() => handleAppClick(app)}
-                  >
-                    <span className="app-icon">{app.icon}</span>
-                    <span className="app-name">{app.name}</span>
-                  </button>
-                ))}
+              <div className="user-info">
+                <div className="user-avatar">👤</div>
+                <div className="user-details">
+                  <div className="user-name">User</div>
+                  <div className="user-email">user@example.com</div>
+                </div>
               </div>
+            </div>
+
+            <div className="start-menu-content">
+              <div className="apps-section">
+                <h3>Applications</h3>
+                <div className="apps-grid">
+                  {tools.map(tool => (
+                    <button
+                      key={tool.id}
+                      className="app-item"
+                      onClick={() => openWindow(tool.id)}
+                    >
+                      <div className="app-icon">{tool.icon}</div>
+                      <div className="app-info">
+                        <div className="app-name">{tool.name}</div>
+                        <div className="app-description">{tool.description}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="start-menu-footer">
+              <button className="power-button">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 1a7 7 0 0 0-7 7v3h2V8a5 5 0 1 1 10 0v3h2V8a7 7 0 0 0-7-7z"/>
+                  <path d="M7 12h2v3H7z"/>
+                </svg>
+                Power
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {activeApp && (
-        <activeApp.component 
-          isOpen={true} 
-          onClose={closeApp}
-          defaultTab={activeApp.id}
-        />
-      )}
+      {/* Individual Tool Windows */}
+      <SecurityTools 
+        isOpen={openWindows.securityTools}
+        onClose={() => closeWindow('securityTools')}
+        onMinimize={() => minimizeWindow('securityTools')}
+      />
+
+      <SearchEngines 
+        isOpen={openWindows.searchEngines}
+        onClose={() => closeWindow('searchEngines')}
+        onMinimize={() => minimizeWindow('searchEngines')}
+      />
+
+      <DarkWeb 
+        isOpen={openWindows.darkWeb}
+        onClose={() => closeWindow('darkWeb')}
+        onMinimize={() => minimizeWindow('darkWeb')}
+      />
+
+      <Vulnerabilities 
+        isOpen={openWindows.vulnerabilities}
+        onClose={() => closeWindow('vulnerabilities')}
+        onMinimize={() => minimizeWindow('vulnerabilities')}
+      />
+
+      <Aviation 
+        isOpen={openWindows.aviation}
+        onClose={() => closeWindow('aviation')}
+        onMinimize={() => minimizeWindow('aviation')}
+      />
     </>
   );
 } 
