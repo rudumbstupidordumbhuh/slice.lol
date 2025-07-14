@@ -8,8 +8,9 @@ const SongSearcher = ({ onSongSelect, isVisible, onClose }) => {
   const [selectedSong, setSelectedSong] = useState(null);
   const searchTimeoutRef = useRef(null);
 
-  // Mock YouTube search (for demo purposes)
-  // In production, you would use the real YouTube API
+  // YouTube API Key
+  const YOUTUBE_API_KEY = 'AIzaSyB9iTr3fqnAfqFPSV7_-Q7Nj2HBR9jbZRo';
+
   const searchYouTube = async (query) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -18,51 +19,39 @@ const SongSearcher = ({ onSongSelect, isVisible, onClose }) => {
 
     setIsLoading(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Mock search results based on query
-    const mockResults = [
-      {
-        id: 'dQw4w9WgXcQ', // Rick Roll
-        title: 'Never Gonna Give You Up',
-        artist: 'Rick Astley',
-        thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg'
-      },
-      {
-        id: '9bZkp7q19f0', // PSY - Gangnam Style
-        title: 'PSY - GANGNAM STYLE(강남스타일) M/V',
-        artist: 'officialpsy',
-        thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg'
-      },
-      {
-        id: 'kJQP7kiw5Fk', // Luis Fonsi - Despacito
-        title: 'Luis Fonsi - Despacito ft. Daddy Yankee',
-        artist: 'Luis Fonsi',
-        thumbnail: 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg'
-      },
-      {
-        id: 'y6120QOlsfU', // Sandstorm
-        title: 'Darude - Sandstorm',
-        artist: 'Darude',
-        thumbnail: 'https://img.youtube.com/vi/y6120QOlsfU/mqdefault.jpg'
-      },
-      {
-        id: 'ZZ5LpwO-An4', // All Star
-        title: 'Smash Mouth - All Star (Official Music Video)',
-        artist: 'Smash Mouth',
-        thumbnail: 'https://img.youtube.com/vi/ZZ5LpwO-An4/mqdefault.jpg'
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('YouTube API request failed');
       }
-    ];
 
-    // Filter results based on query
-    const filteredResults = mockResults.filter(song => 
-      song.title.toLowerCase().includes(query.toLowerCase()) ||
-      song.artist.toLowerCase().includes(query.toLowerCase())
-    );
+      const data = await response.json();
+      const results = data.items.map(item => ({
+        id: item.id.videoId,
+        title: item.snippet.title,
+        artist: item.snippet.channelTitle,
+        thumbnail: item.snippet.thumbnails.medium.url
+      }));
 
-    setSearchResults(filteredResults);
-    setIsLoading(false);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching YouTube:', error);
+      // Fallback to mock results if API fails
+      const mockResults = [
+        {
+          id: 'dQw4w9WgXcQ',
+          title: 'Never Gonna Give You Up',
+          artist: 'Rick Astley',
+          thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg'
+        }
+      ];
+      setSearchResults(mockResults);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSearch = (e) => {
@@ -156,7 +145,7 @@ const SongSearcher = ({ onSongSelect, isVisible, onClose }) => {
         </div>
 
         <div className="song-searcher-footer">
-          <p>Demo Mode - Powered by YouTube</p>
+          <p>Powered by @bu8f</p>
         </div>
       </div>
     </div>
