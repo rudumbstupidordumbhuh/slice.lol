@@ -106,7 +106,7 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
 
   // --- Taskbar logic ---
   const taskbarApps = tools.filter(
-    tool => openWindows[tool.id] || minimizedWindows[tool.id] || pinnedApps.includes(tool.id)
+    tool => openWindows[tool.id] || minimizedWindows[tool.id]
   );
 
   const isAppOpen = (id) => openWindows[id] && !minimizedWindows[id];
@@ -235,6 +235,26 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
           </div>
         </div>
       </div>
+      {/* Start Menu */}
+      {isStartMenuOpen && (
+        <div className="start-menu">
+          <div className="start-menu-apps">
+            {tools.map(app => (
+              <button
+                key={app.id}
+                className="start-menu-app-btn"
+                onClick={() => openWindow(app.id)}
+              >
+                <span className="start-menu-app-icon">{app.icon}</span>
+                <span className="start-menu-app-label">{app.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="start-menu-power">
+            <button className="power-btn" onClick={handlePowerButton}>⏻ Power</button>
+          </div>
+        </div>
+      )}
       {/* Context Menu */}
       {contextMenu && (
         <div
