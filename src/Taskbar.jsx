@@ -10,12 +10,14 @@ import Terminal from './components/Terminal';
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
 import SurpriseEffect from './components/SurpriseEffect';
+import FakeDDOSTerminal from './components/FakeDDOSTerminal';
 
 export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [showShutdownAnimation, setShowShutdownAnimation] = useState(false);
   const [showSurpriseEffect, setShowSurpriseEffect] = useState(false);
+  const [showFakeDDOS, setShowFakeDDOS] = useState(false);
   const [openWindows, setOpenWindows] = useState({
     securityTools: false,
     searchEngines: false,
@@ -184,21 +186,18 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
             <div className="start-menu-content">
               <div className="apps-section">
                 <h3>Applications</h3>
-                <div className="apps-grid">
+                <ul className="apps-list-win10">
                   {tools.map(tool => (
-                    <button
-                      key={tool.id}
-                      className="app-item"
-                      onClick={() => openWindow(tool.id)}
-                    >
-                      <div className="app-icon">{tool.icon}</div>
-                      <div className="app-info">
-                        <div className="app-name">{tool.name}</div>
-                        <div className="app-description">{tool.description}</div>
-                      </div>
-                    </button>
+                    <li key={tool.id}>
+                      <button
+                        className="app-item-win10"
+                        onClick={() => openWindow(tool.id)}
+                      >
+                        {tool.name}
+                      </button>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             </div>
 
@@ -221,6 +220,7 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
         onClose={() => closeWindow('fileExplorer')}
         onMinimize={() => minimizeWindow('fileExplorer')}
         onSurprise={handleSurprise}
+        onFakeDDOS={() => setShowFakeDDOS(true)}
       />
 
       <Terminal 
@@ -275,6 +275,13 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       <SurpriseEffect 
         isActive={showSurpriseEffect}
         onComplete={handleSurpriseComplete}
+      />
+
+      {/* Fake DDoS Terminal */}
+      <FakeDDOSTerminal
+        isOpen={showFakeDDOS}
+        onClose={() => setShowFakeDDOS(false)}
+        onMinimize={() => setShowFakeDDOS(false)}
       />
     </>
   );
