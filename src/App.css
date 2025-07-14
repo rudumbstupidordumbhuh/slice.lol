@@ -522,21 +522,22 @@ html, body, * {
   margin-top: 8px;
 }
 .song-btn {
-  background: linear-gradient(90deg, #fff 0%, #bbb 50%, #000 100%);
+  background: transparent;
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 7px;
   font-family: 'Inter', Arial, sans-serif;
   font-size: 14px;
   font-weight: 600;
   padding: 5px 14px;
   cursor: pointer;
-  box-shadow: 0 2px 8px #0004;
-  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: none;
+  transition: all 0.18s ease;
 }
 .song-btn:hover {
-  background: linear-gradient(90deg, #000 0%, #bbb 50%, #fff 100%);
-  box-shadow: 0 4px 16px #6cf99a55;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 .song-time-divider {
   color: #888;
