@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-import SongSearcher from './components/SongSearcher.jsx';
-import YouTubePlayer from './components/YouTubePlayer.jsx';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -37,11 +35,10 @@ function useTypewriter(text, speed = 50, loop = false, onStep) {
 
 function getHandleFromPath(path) {
   if (!path || path === '/') return '@home';
-  const clean = path.replace(/^\/+|\/+$/g, '');
+  const clean = path.replace(/^\/+/g, '').replace(/\/+$/g, '');
   return clean ? `@${clean}` : '@home';
 }
 
-// Add a custom typewriter hook for the entry message
 function useTypewriterEntry(text, speed = 120, pause = 1200) {
   const [displayed, setDisplayed] = useState('');
   useEffect(() => {
@@ -173,9 +170,6 @@ function HandlePage() {
   const [locationDetails, setLocationDetails] = useState(null);
   const [bubbles, setBubbles] = useState([]);
   const [muteAnimation, setMuteAnimation] = useState(false);
-  const [showSongSearcher, setShowSongSearcher] = useState(false);
-  const [currentYouTubeVideo, setCurrentYouTubeVideo] = useState(null);
-  const [youtubePlayer, setYoutubePlayer] = useState(null);
   const lastMousePos = useRef({ x: 0, y: 0 });
   const mouseMoveTimeout = useRef(null);
 
@@ -268,21 +262,24 @@ function HandlePage() {
   });
 
   useEffect(() => {
-    // Handle volume and mute changes for both local audio and YouTube
-    if (audioRef.current && entered && !currentYouTubeVideo) {
-      audioRef.current.volume = muted ? 0 : volume;
-    }
-    
-    // Handle YouTube player volume
-    if (youtubePlayer && currentYouTubeVideo) {
-      if (muted) {
-        youtubePlayer.mute();
-      } else {
-        youtubePlayer.unMute();
-        youtubePlayer.setVolume(volume * 100);
+    if (entered) {
+      if (!audioRef.current) {
+        const audio = new window.Audio(base + 'care.mp3');
+        audio.loop = true;
+        audio.volume = muted ? 0 : volume;
+        audioRef.current = audio;
+        audio.play().catch(() => {});
+      }
+      if (audioRef.current) {
+        audioRef.current.volume = muted ? 0 : volume;
+        audioRef.current.play().catch(() => {});
+      }
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
       }
     }
-  }, [entered, volume, muted, currentYouTubeVideo, youtubePlayer]);
+  }, [entered, volume, muted]);
 
   useEffect(() => {
     return () => {
@@ -295,7 +292,7 @@ function HandlePage() {
 
   // Add audio loop fallback
   useEffect(() => {
-    if (audioRef.current) {
+    if (entered && audioRef.current) {
       const audio = audioRef.current;
       const onEnded = () => {
         audio.currentTime = 0;
@@ -306,11 +303,11 @@ function HandlePage() {
         audio.removeEventListener('ended', onEnded);
       };
     }
-  }, [audioRef.current]);
+  }, [entered]);
 
   // Track audio time and duration for embed
   useEffect(() => {
-    if (audioRef.current) {
+    if (entered && audioRef.current) {
       const updateTime = () => {
         if (audioRef.current) {
           setAudioTime(audioRef.current.currentTime);
@@ -331,7 +328,7 @@ function HandlePage() {
         }
       };
     }
-  }, [audioRef.current]);
+  }, [entered]);
 
   // Format time mm:ss
   function formatTime(sec) {
@@ -342,13 +339,7 @@ function HandlePage() {
 
   const handleEnter = () => {
     setFadeOut(true);
-    
-    // Start audio/video immediately when user clicks
-    if (currentYouTubeVideo && youtubePlayer) {
-      // Start YouTube video
-      youtubePlayer.playVideo();
-    } else if (!audioRef.current) {
-      // Start local audio
+    if (!audioRef.current) {
       const audio = new window.Audio(base + 'care.mp3');
       audio.loop = true;
       audio.volume = muted ? 0 : volume;
@@ -358,7 +349,6 @@ function HandlePage() {
       audioRef.current.volume = muted ? 0 : volume;
       audioRef.current.play().catch(() => {});
     }
-    
     setTimeout(() => setEntered(true), 500); // match CSS transition duration
   };
 
@@ -368,43 +358,10 @@ function HandlePage() {
     setTimeout(() => setMuteAnimation(false), 300);
   };
 
-  // Song info - dynamic based on selection
-  const [songTitle, setSongTitle] = useState('Overseas');
-  const [songArtist, setSongArtist] = useState('Ken Carson');
-  const [songThumb, setSongThumb] = useState(base + 'yk.png');
-  const songFile = 'https://cdn.discordapp.com/attachments/1393371863542923368/1393372001975930993/video.mp4?ex=6872ee4c&is=68719ccc&hm=fb3f9fbc9913e832999726aa1a57d20f4d412bc4ce50ab5b93c067a940026494&';
-
-  // Handle song selection from searcher
-  const handleSongSelect = (song) => {
-    setSongTitle(song.title);
-    setSongArtist(song.artist);
-    setSongThumb(song.thumbnail);
-    setCurrentYouTubeVideo(song.id);
-    
-    // Stop current audio if playing
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-  };
-
-  // Handle YouTube player ready
-  const handleYouTubeReady = (player) => {
-    setYoutubePlayer(player);
-    if (entered) {
-      player.playVideo();
-    }
-  };
-
-  // Handle YouTube time updates
-  const handleYouTubeTimeUpdate = (time) => {
-    setAudioTime(time);
-  };
-
-  // Handle YouTube duration change
-  const handleYouTubeDurationChange = (duration) => {
-    setAudioDuration(duration);
-  };
+  // Song info
+  const songTitle = 'Overseas';
+  const songArtist = 'Ken Carson';
+  const songThumb = base + 'yk.png';
 
   // Share handler
   function handleShare(e) {
@@ -413,10 +370,10 @@ function HandlePage() {
       navigator.share({
         title: songTitle,
         text: `Check out this song: ${songTitle}`,
-        url: songFile,
+        url: songThumb,
       });
     } else {
-      navigator.clipboard.writeText(songFile);
+      navigator.clipboard.writeText(songThumb);
       setShowShareMsg(true);
       setTimeout(() => setShowShareMsg(false), 1200);
     }
@@ -426,7 +383,7 @@ function HandlePage() {
   async function handleDownload(e) {
     e.preventDefault();
     try {
-      const response = await fetch(songFile);
+      const response = await fetch(songThumb);
       if (!response.ok) throw new Error('Failed to fetch file');
       
       const blob = await response.blob();
@@ -441,7 +398,7 @@ function HandlePage() {
     } catch (error) {
       console.error('Download failed:', error);
       // Fallback: open in new tab
-      window.open(songFile, '_blank');
+      window.open(songThumb, '_blank');
     }
   }
 
@@ -589,14 +546,10 @@ function HandlePage() {
     };
   }, []);
 
-  // Mobile detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-  // Bubble trail effect (desktop only)
+  // Bubble trail effect
   useEffect(() => {
-    // Only enable bubble trail after user has entered and on desktop
-    if (!entered || isMobile || isTouchDevice) return;
+    // Only enable bubble trail after user has entered
+    if (!entered) return;
 
     const handleMouseMove = (e) => {
       const currentPos = { x: e.clientX, y: e.clientY };
@@ -644,9 +597,12 @@ function HandlePage() {
         clearTimeout(mouseMoveTimeout.current);
       }
     };
-  }, [entered, isMobile, isTouchDevice]);
+  }, [entered]);
 
   // Mobile-specific optimizations
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
   useEffect(() => {
     if (isMobile || isTouchDevice) {
       // Prevent zoom on double tap
@@ -712,30 +668,15 @@ function HandlePage() {
           }}
         />
       ))}
-      {/* Background video or YouTube video */}
-      {currentYouTubeVideo ? (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
-          <YouTubePlayer
-            videoId={currentYouTubeVideo}
-            onVideoReady={handleYouTubeReady}
-            onTimeUpdate={handleYouTubeTimeUpdate}
-            onDurationChange={handleYouTubeDurationChange}
-            isPlaying={entered}
-            volume={volume}
-            muted={muted}
-          />
-        </div>
-      ) : (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="background-video"
-          src="/video.mp4"
-          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
-        />
-      )}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="background-video"
+        src="/video.mp4"
+        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
+      />
       {!entered && (
         <div className={`entry-overlay${fadeOut ? ' fade-out' : ''}`} onClick={handleEnter}>
           <div className="entry-message">
@@ -786,16 +727,6 @@ function HandlePage() {
                 </div>
               </div>
             </div>
-            <div className="song-embed-btns">
-              <button className="song-btn" onClick={() => setShowSongSearcher(true)}>
-                🔍 Search
-              </button>
-              {currentYouTubeVideo && (
-                <button className="song-btn" onClick={handleShare}>
-                  📤 Share
-                </button>
-              )}
-            </div>
           </div>
 
           <div className="sound-bar">
@@ -832,13 +763,6 @@ function HandlePage() {
           ))}
         </div>
       )}
-
-      {/* Song Searcher Modal */}
-      <SongSearcher
-        isVisible={showSongSearcher}
-        onSongSelect={handleSongSelect}
-        onClose={() => setShowSongSearcher(false)}
-      />
     </div>
   );
 }
