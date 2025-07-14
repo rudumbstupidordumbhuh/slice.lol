@@ -776,9 +776,11 @@ function HandlePage({ onEnter }) {
 function App() {
   const [entered, setEntered] = useState(false);
   const [isStartingUp, setIsStartingUp] = useState(false);
+  const [hasPoweredOff, setHasPoweredOff] = useState(false);
 
   const handlePowerOff = () => {
     setEntered(false);
+    setHasPoweredOff(true);
   };
 
   const handlePowerOn = () => {
@@ -788,11 +790,11 @@ function App() {
       setEntered(true);
     }, 1500);
   };
-  
+
   return <>
     <HandlePage onEnter={() => setEntered(true)} />
-    {!entered && isStartingUp && <WindowsBootAnimation isVisible={true} />}
-    {!entered && !isStartingUp && <LoginScreen isVisible={!entered && !isStartingUp} onPowerOn={handlePowerOn} />}
+    {!entered && isStartingUp && hasPoweredOff && <WindowsBootAnimation isVisible={true} />}
+    {!entered && (!isStartingUp || !hasPoweredOff) && <LoginScreen isVisible={!entered && (!isStartingUp || !hasPoweredOff)} onPowerOn={handlePowerOn} />}
     {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />}
   </>;
 }
