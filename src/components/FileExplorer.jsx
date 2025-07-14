@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
-export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, onDDoS }) {
+export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }) {
   const [currentPath, setCurrentPath] = useState('C:\\');
   const [selectedFile, setSelectedFile] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
@@ -34,7 +34,6 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'Documents': { type: 'folder', children: {} },
         'Downloads': { type: 'folder', children: {
           'surprise.py': { type: 'file', size: '3.2 KB' },
-          'ddos.py': { type: 'file', size: '2.7 KB' },
           'document.pdf': { type: 'file', size: '1.5 MB' },
           'image.jpg': { type: 'file', size: '2.8 MB' },
           'video.mp4': { type: 'file', size: '45.2 MB' },
@@ -53,8 +52,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
         'guns.lol project': { type: 'folder', children: {} },
         'README.txt': { type: 'file', size: '2.1 KB' },
         'screenshot.png': { type: 'file', size: '1.8 MB' },
-        'surprise.py': { type: 'file', size: '3.2 KB' },
-        'ddos.py': { type: 'file', size: '2.7 KB' }
+        'surprise.py': { type: 'file', size: '3.2 KB' }
       }
     },
     'C:\\Users\\bu8f\\Documents': {
@@ -69,7 +67,6 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
       type: 'folder',
       children: {
         'surprise.py': { type: 'file', size: '3.2 KB' },
-        'ddos.py': { type: 'file', size: '2.7 KB' },
         'document.pdf': { type: 'file', size: '1.5 MB' },
         'image.jpg': { type: 'file', size: '2.8 MB' },
         'video.mp4': { type: 'file', size: '45.2 MB' },
@@ -199,8 +196,6 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, 
                       navigateTo(currentPath + name + '\\');
                     } else if (name === 'surprise.py' && onSurprise) {
                       onSurprise();
-                    } else if (name === 'ddos.py' && onDDoS) {
-                      onDDoS();
                     }
                   }}
                 >
