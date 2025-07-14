@@ -42,11 +42,13 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
   };
 
   const searchDarkWeb = async (query) => {
-    // Darksearch.io API (free)
-    const response = await fetch(`https://darksearch.io/api/search?query=${encodeURIComponent(query)}&page=1`, {
+    // DarkSearch API (free tier) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://darksearch.io/api/search?query=${encodeURIComponent(query)}&page=1`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -56,22 +58,24 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
 
     const data = await response.json();
     return {
-      type: 'darkweb',
+      type: 'dark_web',
       data: {
         query: query,
         results: data.data || [],
         totalResults: data.total || 0,
-        searchEngine: 'Darksearch.io'
+        searchEngine: 'DarkSearch'
       }
     };
   };
 
   const lookupOnion = async (onionUrl) => {
-    // Onion Lookup API (free)
-    const response = await fetch(`https://onion.ail-project.org/api/lookup?url=${encodeURIComponent(onionUrl)}`, {
+    // AIL Project Onion Lookup API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://onion.ail-project.org/api/lookup?url=${encodeURIComponent(onionUrl)}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -84,10 +88,11 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
       type: 'onion',
       data: {
         url: onionUrl,
-        exists: data.exists || false,
-        metadata: data.metadata || {},
+        status: data.status || 'Unknown',
+        title: data.title || 'No title',
+        description: data.description || 'No description',
         lastSeen: data.last_seen || 'Unknown',
-        searchEngine: 'Onion Lookup'
+        searchEngine: 'AIL Project'
       }
     };
   };
@@ -95,7 +100,7 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
   const renderResults = () => {
     if (!results) return null;
 
-    if (results.type === 'darkweb') {
+    if (results.type === 'dark_web') {
       return (
         <div className="results">
           <h3>Dark Web Search Results</h3>

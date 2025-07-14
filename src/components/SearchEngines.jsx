@@ -46,11 +46,13 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
   };
 
   const searchMemex = async (query) => {
-    // Memex Marginalia API (free)
-    const response = await fetch(`https://memex.marginalia.nu/search?query=${encodeURIComponent(query)}&count=5`, {
+    // Memex Marginalia API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://memex.marginalia.nu/search?query=${encodeURIComponent(query)}&count=5`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -71,11 +73,13 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
   };
 
   const searchSerpstack = async (query) => {
-    // Serpstack API (free tier)
-    const response = await fetch(`http://api.serpstack.com/search?access_key=472744b4b488e0d6dc0f688fad9bd777&query=${encodeURIComponent(query)}`, {
+    // Serpstack API (free tier) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}http://api.serpstack.com/search?access_key=472744b4b488e0d6dc0f688fad9bd777&query=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -96,11 +100,13 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
   };
 
   const searchDuckDuckGo = async (query) => {
-    // DuckDuckGo Instant Answers API (free)
-    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`, {
+    // DuckDuckGo Instant Answers API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 

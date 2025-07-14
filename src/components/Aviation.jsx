@@ -26,13 +26,13 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
       let result;
       switch (activeTab) {
         case 'aviationstack':
-          result = await searchAviationStack(input);
+          result = await searchFlights(input);
           break;
         case 'opensky':
-          result = await searchOpenSky(input);
+          result = await searchAircraft(input);
           break;
         case 'aviationapi':
-          result = await searchAviationAPI(input);
+          result = await searchAirports(input);
           break;
         default:
           throw new Error('Invalid tab');
@@ -45,17 +45,19 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
     }
   };
 
-  const searchAviationStack = async (query) => {
-    // Aviation Stack API (free tier - 100 requests/month)
-    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=6dad36e1f40208970abb639991f6c37c&search=${encodeURIComponent(query)}`, {
+  const searchFlights = async (query) => {
+    // Aviation Stack API (free tier) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}http://api.aviationstack.com/v1/flights?access_key=6dad36e1f40208970abb639991f6c37c&search=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
     if (!response.ok) {
-      throw new Error('Aviation Stack search failed');
+      throw new Error('Flight search failed');
     }
 
     const data = await response.json();
@@ -65,47 +67,51 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
         query: query,
         flights: data.data || [],
         totalResults: data.pagination?.total || 0,
-        source: 'Aviation Stack'
+        searchEngine: 'Aviation Stack'
       }
     };
   };
 
-  const searchOpenSky = async (query) => {
-    // OpenSky Network API (free)
-    const response = await fetch(`https://opensky-network.org/api/states/all?search=${encodeURIComponent(query)}`, {
+  const searchAircraft = async (query) => {
+    // OpenSky Network API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://opensky-network.org/api/states/all?search=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
     if (!response.ok) {
-      throw new Error('OpenSky search failed');
+      throw new Error('Aircraft search failed');
     }
 
     const data = await response.json();
     return {
-      type: 'states',
+      type: 'aircraft',
       data: {
         query: query,
         states: data.states || [],
         totalResults: data.states?.length || 0,
-        source: 'OpenSky Network'
+        searchEngine: 'OpenSky Network'
       }
     };
   };
 
-  const searchAviationAPI = async (query) => {
-    // AviationAPI (free)
-    const response = await fetch(`https://api.aviationapi.com/v1/airports?apt=${encodeURIComponent(query)}`, {
+  const searchAirports = async (query) => {
+    // Aviation API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://api.aviationapi.com/v1/airports?apt=${encodeURIComponent(query)}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
     if (!response.ok) {
-      throw new Error('AviationAPI search failed');
+      throw new Error('Airport search failed');
     }
 
     const data = await response.json();
@@ -114,8 +120,8 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
       data: {
         query: query,
         airports: data || [],
-        totalResults: data.length || 0,
-        source: 'AviationAPI'
+        totalResults: data?.length || 0,
+        searchEngine: 'Aviation API'
       }
     };
   };
@@ -128,7 +134,7 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
         <div className="results">
           <h3>Flight Results</h3>
           <p><strong>Query:</strong> {results.data.query}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
           <p><strong>Total Flights:</strong> {results.data.totalResults}</p>
           {results.data.flights.length > 0 && (
             <div className="aviation-results">
@@ -145,12 +151,12 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
           )}
         </div>
       );
-    } else if (results.type === 'states') {
+    } else if (results.type === 'aircraft') {
       return (
         <div className="results">
           <h3>Aircraft States</h3>
           <p><strong>Query:</strong> {results.data.query}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
           <p><strong>Total Aircraft:</strong> {results.data.totalResults}</p>
           {results.data.states.length > 0 && (
             <div className="states-results">
@@ -172,7 +178,7 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
         <div className="results">
           <h3>Airport Results</h3>
           <p><strong>Query:</strong> {results.data.query}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
           <p><strong>Total Airports:</strong> {results.data.totalResults}</p>
           {results.data.airports.length > 0 && (
             <div className="airport-results">

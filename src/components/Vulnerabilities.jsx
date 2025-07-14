@@ -32,7 +32,7 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
           result = await searchOpenCVE(input);
           break;
         case 'kevin':
-          result = await searchKEVin(input);
+          result = await searchGTFOBins(input);
           break;
         default:
           throw new Error('Invalid tab');
@@ -46,11 +46,13 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
   };
 
   const searchNVD = async (cveId) => {
-    // National Vulnerability Database API (free)
-    const response = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=${cveId}`, {
+    // NVD API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=${cveId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -60,22 +62,26 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
 
     const data = await response.json();
     return {
-      type: 'cve',
+      type: 'nvd',
       data: {
         cveId: cveId,
-        vulnerability: data.vulnerabilities?.[0]?.cve || {},
-        totalResults: data.totalResults || 0,
-        source: 'NVD'
+        description: data.vulnerabilities?.[0]?.cve?.descriptions?.[0]?.value || 'No description',
+        severity: data.vulnerabilities?.[0]?.cve?.metrics?.cvssMetricV31?.[0]?.cvssData?.baseSeverity || 'Unknown',
+        score: data.vulnerabilities?.[0]?.cve?.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore || 'Unknown',
+        publishedDate: data.vulnerabilities?.[0]?.cve?.published || 'Unknown',
+        searchEngine: 'NVD'
       }
     };
   };
 
   const searchOpenCVE = async (cveId) => {
-    // OpenCVE API (free)
-    const response = await fetch(`https://www.opencve.io/api/cve/${cveId}`, {
+    // OpenCVE API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://www.opencve.io/api/cve/${cveId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
@@ -88,42 +94,39 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
       type: 'opencve',
       data: {
         cveId: cveId,
-        summary: data.summary || 'No summary available',
-        cvss: data.cvss || {},
+        summary: data.summary || 'No summary',
+        cvss: data.cvss || 'Unknown',
         references: data.references || [],
-        source: 'OpenCVE'
+        vendors: data.vendors || [],
+        searchEngine: 'OpenCVE'
       }
     };
   };
 
-  const searchKEVin = async (cveId) => {
-    // KEVin API (free)
-    const response = await fetch(`https://kevin.gtfkd.com/api/v1/cve/${cveId}`, {
+  const searchGTFOBins = async (cveId) => {
+    // GTFOBins API (free) - using CORS proxy
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(`${corsProxy}https://kevin.gtfkd.com/api/v1/cve/${cveId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': 'https://www.bu8f.online'
       }
     });
 
     if (!response.ok) {
-      throw new Error('KEVin search failed');
+      throw new Error('GTFOBins search failed');
     }
 
     const data = await response.json();
     return {
-      type: 'kevin',
+      type: 'gtfobins',
       data: {
         cveId: cveId,
-        isExploited: data.is_exploited || false,
-        dateAdded: data.date_added || 'Unknown',
-        vendorProject: data.vendor_project || 'Unknown',
-        product: data.product || 'Unknown',
-        vulnerabilityName: data.vulnerability_name || 'Unknown',
-        dateShortName: data.date_short_name || 'Unknown',
-        requiredAction: data.required_action || 'Unknown',
-        dueDate: data.due_date || 'Unknown',
-        notes: data.notes || 'No notes available',
-        source: 'KEVin'
+        exploits: data.exploits || [],
+        description: data.description || 'No description',
+        references: data.references || [],
+        searchEngine: 'GTFOBins'
       }
     };
   };
@@ -131,20 +134,16 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
   const renderResults = () => {
     if (!results) return null;
 
-    if (results.type === 'cve') {
+    if (results.type === 'nvd') {
       return (
         <div className="results">
           <h3>NVD Vulnerability Results</h3>
           <p><strong>CVE ID:</strong> {results.data.cveId}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
-          {results.data.vulnerability && (
-            <>
-              <p><strong>Description:</strong> {results.data.vulnerability.descriptions?.[0]?.value || 'No description'}</p>
-              <p><strong>Severity:</strong> {results.data.vulnerability.metrics?.cvssMetricV31?.[0]?.cvssData?.baseSeverity || 'Unknown'}</p>
-              <p><strong>Published:</strong> {results.data.vulnerability.published || 'Unknown'}</p>
-              <p><strong>Last Modified:</strong> {results.data.vulnerability.lastModified || 'Unknown'}</p>
-            </>
-          )}
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
+          <p><strong>Description:</strong> {results.data.description}</p>
+          <p><strong>Severity:</strong> {results.data.severity}</p>
+          <p><strong>Score:</strong> {results.data.score}</p>
+          <p><strong>Published Date:</strong> {results.data.publishedDate}</p>
         </div>
       );
     } else if (results.type === 'opencve') {
@@ -152,14 +151,15 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
         <div className="results">
           <h3>OpenCVE Results</h3>
           <p><strong>CVE ID:</strong> {results.data.cveId}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
           <p><strong>Summary:</strong> {results.data.summary}</p>
-          {results.data.cvss && Object.keys(results.data.cvss).length > 0 && (
-            <div className="cvss-info">
-              <h4>CVSS Information:</h4>
+          <p><strong>CVSS:</strong> {results.data.cvss}</p>
+          {results.data.vendors && results.data.vendors.length > 0 && (
+            <div className="vendors">
+              <h4>Vendors:</h4>
               <ul>
-                {Object.entries(results.data.cvss).map(([key, value]) => (
-                  <li key={key}><strong>{key}:</strong> {value}</li>
+                {results.data.vendors.map((vendor, index) => (
+                  <li key={index}>{vendor}</li>
                 ))}
               </ul>
             </div>
@@ -176,21 +176,23 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
           )}
         </div>
       );
-    } else if (results.type === 'kevin') {
+    } else if (results.type === 'gtfobins') {
       return (
         <div className="results">
-          <h3>KEVin Results</h3>
+          <h3>GTFOBins Results</h3>
           <p><strong>CVE ID:</strong> {results.data.cveId}</p>
-          <p><strong>Source:</strong> {results.data.source}</p>
-          <p><strong>Exploited:</strong> {results.data.isExploited ? 'Yes' : 'No'}</p>
-          <p><strong>Vendor/Project:</strong> {results.data.vendorProject}</p>
-          <p><strong>Product:</strong> {results.data.product}</p>
-          <p><strong>Vulnerability Name:</strong> {results.data.vulnerabilityName}</p>
-          <p><strong>Date Added:</strong> {results.data.dateAdded}</p>
-          <p><strong>Required Action:</strong> {results.data.requiredAction}</p>
-          <p><strong>Due Date:</strong> {results.data.dueDate}</p>
-          {results.data.notes && (
-            <p><strong>Notes:</strong> {results.data.notes}</p>
+          <p><strong>Source:</strong> {results.data.searchEngine}</p>
+          <p><strong>Description:</strong> {results.data.description}</p>
+          <p><strong>Exploits:</strong> {results.data.exploits.length} found</p>
+          {results.data.references.length > 0 && (
+            <div className="references">
+              <h4>References:</h4>
+              <ul>
+                {results.data.references.slice(0, 5).map((ref, index) => (
+                  <li key={index}>{ref}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       );
