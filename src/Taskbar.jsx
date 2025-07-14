@@ -10,12 +10,15 @@ import Terminal from './components/Terminal';
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
 import SurpriseEffect from './components/SurpriseEffect';
+import { useRef } from 'react';
 
 export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [showShutdownAnimation, setShowShutdownAnimation] = useState(false);
   const [showSurpriseEffect, setShowSurpriseEffect] = useState(false);
+  // New state for pinned and minimized
+  const [pinnedApps, setPinnedApps] = useState(['fileExplorer']);
   const [openWindows, setOpenWindows] = useState({
     securityTools: false,
     searchEngines: false,
@@ -25,6 +28,14 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     fileExplorer: false,
     terminal: false
   });
+  const [minimizedWindows, setMinimizedWindows] = useState({});
+  const [contextMenu, setContextMenu] = useState(null); // { appId, x, y }
+  const [ddosFlow, setDdosFlow] = useState(false);
+  const [ddosStep, setDdosStep] = useState(0); // 0: not started, 1: ask site, 2: ask threads, 3: running
+  const [ddosSite, setDdosSite] = useState('');
+  const [ddosThreads, setDdosThreads] = useState('');
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const terminalRef = useRef();
 
   const tools = [
     {
@@ -75,26 +86,58 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     setIsStartMenuOpen(!isStartMenuOpen);
   };
 
+  // --- Window logic ---
   const openWindow = (windowId) => {
-    setOpenWindows(prev => ({
-      ...prev,
-      [windowId]: true
-    }));
+    setOpenWindows(prev => ({ ...prev, [windowId]: true }));
+    setMinimizedWindows(prev => ({ ...prev, [windowId]: false }));
     setIsStartMenuOpen(false);
   };
-
   const closeWindow = (windowId) => {
-    setOpenWindows(prev => ({
-      ...prev,
-      [windowId]: false
-    }));
+    setOpenWindows(prev => ({ ...prev, [windowId]: false }));
+    setMinimizedWindows(prev => ({ ...prev, [windowId]: false }));
+  };
+  const minimizeWindow = (windowId) => {
+    setMinimizedWindows(prev => ({ ...prev, [windowId]: true }));
+  };
+  const restoreWindow = (windowId) => {
+    setOpenWindows(prev => ({ ...prev, [windowId]: true }));
+    setMinimizedWindows(prev => ({ ...prev, [windowId]: false }));
   };
 
-  const minimizeWindow = (windowId) => {
-    setOpenWindows(prev => ({
-      ...prev,
-      [windowId]: false
-    }));
+  // --- Taskbar logic ---
+  const taskbarApps = tools.filter(
+    tool => openWindows[tool.id] || minimizedWindows[tool.id] || pinnedApps.includes(tool.id)
+  );
+
+  const isAppOpen = (id) => openWindows[id] && !minimizedWindows[id];
+  const isAppMinimized = (id) => openWindows[id] && minimizedWindows[id];
+  const isAppPinned = (id) => pinnedApps.includes(id);
+
+  const handleTaskbarClick = (id) => {
+    if (isAppOpen(id)) {
+      minimizeWindow(id);
+    } else if (isAppMinimized(id)) {
+      restoreWindow(id);
+    } else {
+      openWindow(id);
+    }
+  };
+
+  // --- Context menu logic ---
+  const handleTaskbarRightClick = (e, id) => {
+    e.preventDefault();
+    setContextMenu({ appId: id, x: e.clientX, y: e.clientY });
+  };
+  const handlePinToggle = (id) => {
+    setPinnedApps(prev =>
+      prev.includes(id) ? prev.filter(app => app !== id) : [...prev, id]
+    );
+    setContextMenu(null);
+  };
+  const handleContextClose = () => setContextMenu(null);
+  const handleContextCloseWindow = (id) => {
+    closeWindow(id);
+    setContextMenu(null);
   };
 
   const handlePowerButton = () => {
@@ -133,6 +176,19 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     setShowSurpriseEffect(false);
   };
 
+  // DDoS handler
+  const handleDDoS = () => {
+    setTerminalOpen(true);
+    setDdosFlow(true);
+    setDdosStep(1);
+    setDdosSite('');
+    setDdosThreads('');
+    // Open terminal if not already open
+    openWindow('terminal');
+    setMinimizedWindows(prev => ({ ...prev, terminal: false }));
+  };
+
+  // --- Render ---
   if (!isVisible) return null;
 
   return (
@@ -148,7 +204,20 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
             </svg>
           </button>
         </div>
-
+        <div className="taskbar-apps">
+          {taskbarApps.map(app => (
+            <button
+              key={app.id}
+              className={`taskbar-app-btn${isAppOpen(app.id) ? ' open' : ''}${isAppMinimized(app.id) ? ' minimized' : ''}${isAppPinned(app.id) ? ' pinned' : ''}`}
+              onClick={() => handleTaskbarClick(app.id)}
+              onContextMenu={e => handleTaskbarRightClick(e, app.id)}
+              title={app.name}
+            >
+              <span className="taskbar-app-icon">{app.icon}</span>
+              <span className="taskbar-app-label">{app.name}</span>
+            </button>
+          ))}
+        </div>
         <div className="taskbar-center">
           <div className="taskbar-time">
             {new Date().toLocaleTimeString('en-US', { 
@@ -158,7 +227,6 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
             })}
           </div>
         </div>
-
         <div className="taskbar-right">
           <div className="system-tray">
             <div className="tray-icon">📶</div>
@@ -167,110 +235,78 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
           </div>
         </div>
       </div>
-
-      {isStartMenuOpen && (
-        <div className="start-menu-overlay" onClick={toggleStartMenu}>
-          <div className="start-menu" onClick={e => e.stopPropagation()}>
-            <div className="start-menu-header">
-              <div className="user-info">
-                <div className="user-avatar">👤</div>
-                <div className="user-details">
-                  <div className="user-name">bu8f</div>
-                  <div className="user-email">https://www.bu8f.online/</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="start-menu-content">
-              <div className="apps-section">
-                <h3>Applications</h3>
-                <div className="apps-grid">
-                  {tools.map(tool => (
-                    <button
-                      key={tool.id}
-                      className="app-item"
-                      onClick={() => openWindow(tool.id)}
-                    >
-                      <div className="app-icon">{tool.icon}</div>
-                      <div className="app-info">
-                        <div className="app-name">{tool.name}</div>
-                        <div className="app-description">{tool.description}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="start-menu-footer">
-              <button className="power-button" onClick={handlePowerButton}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 1a7 7 0 0 0-7 7v3h2V8a5 5 0 1 1 10 0v3h2V8a7 7 0 0 0-7-7z"/>
-                  <path d="M7 12h2v3H7z"/>
-                </svg>
-                Power
-              </button>
-            </div>
-          </div>
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="taskbar-context-menu"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onMouseLeave={handleContextClose}
+        >
+          <button onClick={() => handlePinToggle(contextMenu.appId)}>
+            {isAppPinned(contextMenu.appId) ? 'Unpin from taskbar' : 'Pin to taskbar'}
+          </button>
+          {isAppOpen(contextMenu.appId) || isAppMinimized(contextMenu.appId) ? (
+            <button onClick={() => handleContextCloseWindow(contextMenu.appId)}>Close window</button>
+          ) : null}
         </div>
       )}
-
-      {/* Individual Tool Windows */}
+      {/* Windows */}
       <FileExplorer 
-        isOpen={openWindows.fileExplorer}
+        isOpen={openWindows.fileExplorer && !minimizedWindows.fileExplorer}
         onClose={() => closeWindow('fileExplorer')}
         onMinimize={() => minimizeWindow('fileExplorer')}
         onSurprise={handleSurprise}
+        onDDoS={handleDDoS}
       />
-
-      <Terminal 
-        isOpen={openWindows.terminal}
+      <Terminal
+        ref={terminalRef}
+        isOpen={openWindows.terminal && !minimizedWindows.terminal}
         onClose={() => closeWindow('terminal')}
         onMinimize={() => minimizeWindow('terminal')}
         onSurprise={handleSurprise}
+        ddosFlow={ddosFlow}
+        ddosStep={ddosStep}
+        setDdosStep={setDdosStep}
+        ddosSite={ddosSite}
+        setDdosSite={setDdosSite}
+        ddosThreads={ddosThreads}
+        setDdosThreads={setDdosThreads}
+        setDdosFlow={setDdosFlow}
       />
-
       <SecurityTools 
-        isOpen={openWindows.securityTools}
+        isOpen={openWindows.securityTools && !minimizedWindows.securityTools}
         onClose={() => closeWindow('securityTools')}
         onMinimize={() => minimizeWindow('securityTools')}
       />
-
       <SearchEngines 
-        isOpen={openWindows.searchEngines}
+        isOpen={openWindows.searchEngines && !minimizedWindows.searchEngines}
         onClose={() => closeWindow('searchEngines')}
         onMinimize={() => minimizeWindow('searchEngines')}
       />
-
       <DarkWeb 
-        isOpen={openWindows.darkWeb}
+        isOpen={openWindows.darkWeb && !minimizedWindows.darkWeb}
         onClose={() => closeWindow('darkWeb')}
         onMinimize={() => minimizeWindow('darkWeb')}
       />
-
       <Vulnerabilities 
-        isOpen={openWindows.vulnerabilities}
+        isOpen={openWindows.vulnerabilities && !minimizedWindows.vulnerabilities}
         onClose={() => closeWindow('vulnerabilities')}
         onMinimize={() => minimizeWindow('vulnerabilities')}
       />
-
       <Aviation 
-        isOpen={openWindows.aviation}
+        isOpen={openWindows.aviation && !minimizedWindows.aviation}
         onClose={() => closeWindow('aviation')}
         onMinimize={() => minimizeWindow('aviation')}
       />
-
       {/* Shutdown Animation */}
       <ShutdownAnimation 
         isVisible={showShutdownAnimation}
       />
-
       {/* Login Screen */}
       <LoginScreen 
         isVisible={showLoginScreen}
         onPowerOn={handlePowerOn}
       />
-
       {/* Surprise Effect */}
       <SurpriseEffect 
         isActive={showSurpriseEffect}

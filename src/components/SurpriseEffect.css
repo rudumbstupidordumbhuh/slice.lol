@@ -107,3 +107,83 @@
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
 } 
+
+.surprise-overlay.skull-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s ease;
+}
+
+.surprise-overlay.skull-flash.flash-on {
+  background: #000;
+  animation: skull-flash-on 0.1s linear;
+}
+
+.surprise-overlay.skull-flash.flash-off {
+  background: #fff;
+  animation: skull-flash-off 0.1s linear;
+}
+
+@keyframes skull-flash-on {
+  0% { background: #fff; }
+  100% { background: #000; }
+}
+
+@keyframes skull-flash-off {
+  0% { background: #000; }
+  100% { background: #fff; }
+}
+
+.confetti-piece.skull {
+  position: absolute;
+  pointer-events: none;
+  animation: skull-fall 3s linear infinite;
+  user-select: none;
+}
+
+@keyframes skull-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+.surprise-text.skull-text {
+  text-align: center;
+  color: #fff;
+  text-shadow: 2px 2px 8px #000, 0 0 10px #fff;
+  z-index: 10000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: skull-bounce 0.5s ease infinite alternate;
+}
+
+.surprise-overlay.skull-flash.flash-off .surprise-text.skull-text {
+  color: #000;
+  text-shadow: 2px 2px 8px #fff, 0 0 10px #000;
+}
+
+.surprise-text.skull-text h1 {
+  font-size: 3.2rem;
+  margin: 0;
+  letter-spacing: 2px;
+  animation: skull-glow 1s linear infinite alternate;
+}
+
+@keyframes skull-bounce {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-20px); }
+}
+
+@keyframes skull-glow {
+  from { text-shadow: 0 0 10px #fff, 0 0 20px #000; }
+  to { text-shadow: 0 0 20px #fff, 0 0 40px #000; }
+} 

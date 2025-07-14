@@ -13,25 +13,22 @@ export default function SurpriseEffect({ isActive, onComplete }) {
     let flashCount = 0;
     const maxFlashes = 20;
 
-    // Create confetti particles
+    // Create confetti particles (skulls)
     const createConfetti = () => {
-      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
       const newConfetti = [];
-      
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 40; i++) {
         newConfetti.push({
           id: Math.random(),
           x: Math.random() * window.innerWidth,
           y: -10,
           vx: (Math.random() - 0.5) * 8,
           vy: Math.random() * 3 + 2,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          size: Math.random() * 10 + 5,
+          emoji: '💀',
+          size: Math.random() * 18 + 18,
           rotation: Math.random() * 360,
           rotationSpeed: (Math.random() - 0.5) * 10
         });
       }
-      
       setConfetti(prev => [...prev, ...newConfetti]);
     };
 
@@ -39,7 +36,6 @@ export default function SurpriseEffect({ isActive, onComplete }) {
     flashInterval = setInterval(() => {
       flashCount++;
       setFlashCount(flashCount);
-      
       if (flashCount >= maxFlashes) {
         clearInterval(flashInterval);
         clearInterval(confettiInterval);
@@ -79,31 +75,21 @@ export default function SurpriseEffect({ isActive, onComplete }) {
   if (!isActive) return null;
 
   return (
-    <div className={`surprise-overlay ${flashCount % 2 === 0 ? 'flash-on' : 'flash-off'}`}>
+    <div className={`surprise-overlay skull-flash ${flashCount % 2 === 0 ? 'flash-on' : 'flash-off'}`}>
       {confetti.map(particle => (
         <div
           key={particle.id}
-          className="confetti-piece"
+          className="confetti-piece skull"
           style={{
             left: particle.x + 'px',
             top: particle.y + 'px',
-            backgroundColor: particle.color,
-            width: particle.size + 'px',
-            height: particle.size + 'px',
+            fontSize: particle.size + 'px',
             transform: `rotate(${particle.rotation}deg)`
           }}
-        />
+        >{particle.emoji}</div>
       ))}
-      <div className="surprise-text">
-        <h1>🎉 SURPRISE! 🎉</h1>
-        <p>You found the secret file!</p>
-        <div className="rainbow-text">
-          <span>🌈</span>
-          <span>✨</span>
-          <span>🎊</span>
-          <span>🎈</span>
-          <span>🎁</span>
-        </div>
+      <div className="surprise-text skull-text">
+        <h1>💀 You found nothing sybau 💀</h1>
       </div>
     </div>
   );

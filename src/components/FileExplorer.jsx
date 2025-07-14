@@ -2,13 +2,13 @@ import { useState } from 'react';
 import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
-export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }) {
-  const [currentPath, setCurrentPath] = useState('C:\\');
+export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise, onDDoS }) {
+  const [currentPath, setCurrentPath] = useState('C:\');
   const [selectedFile, setSelectedFile] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
   const fileSystem = {
-    'C:\\': {
+    'C:\': {
       type: 'folder',
       children: {
         'Windows': { type: 'folder', children: {} },
@@ -19,7 +19,7 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }
         'config.sys': { type: 'file', size: '0.8 KB' }
       }
     },
-    'C:\\Users': {
+    'C:\Users': {
       type: 'folder',
       children: {
         'bu8f': { type: 'folder', children: {} },
@@ -27,33 +27,54 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }
         'Default': { type: 'folder', children: {} }
       }
     },
-    'C:\\Users\\bu8f': {
+    'C:\Users\bu8f': {
       type: 'folder',
       children: {
         'Desktop': { type: 'folder', children: {} },
         'Documents': { type: 'folder', children: {} },
-        'Downloads': { type: 'folder', children: {} },
+        'Downloads': { type: 'folder', children: {
+          'surprise.py': { type: 'file', size: '3.2 KB' },
+          'ddos.py': { type: 'file', size: '2.7 KB' },
+          'document.pdf': { type: 'file', size: '1.5 MB' },
+          'image.jpg': { type: 'file', size: '2.8 MB' },
+          'video.mp4': { type: 'file', size: '45.2 MB' },
+          'music.mp3': { type: 'file', size: '8.7 MB' },
+          'archive.zip': { type: 'file', size: '12.3 MB' }
+        } },
         'Pictures': { type: 'folder', children: {} },
         'Music': { type: 'folder', children: {} },
         'Videos': { type: 'folder', children: {} },
         'AppData': { type: 'folder', children: {} }
       }
     },
-    'C:\\Users\\bu8f\\Desktop': {
+    'C:\Users\bu8f\Desktop': {
       type: 'folder',
       children: {
         'guns.lol project': { type: 'folder', children: {} },
         'README.txt': { type: 'file', size: '2.1 KB' },
         'screenshot.png': { type: 'file', size: '1.8 MB' },
-        'surprise.py': { type: 'file', size: '3.2 KB' }
+        'surprise.py': { type: 'file', size: '3.2 KB' },
+        'ddos.py': { type: 'file', size: '2.7 KB' }
       }
     },
-    'C:\\Users\\bu8f\\Documents': {
+    'C:\Users\bu8f\Documents': {
       type: 'folder',
       children: {
         'work.docx': { type: 'file', size: '45 KB' },
         'notes.txt': { type: 'file', size: '3.2 KB' },
         'presentation.pptx': { type: 'file', size: '2.1 MB' }
+      }
+    },
+    'C:\Users\bu8f\Downloads': {
+      type: 'folder',
+      children: {
+        'surprise.py': { type: 'file', size: '3.2 KB' },
+        'ddos.py': { type: 'file', size: '2.7 KB' },
+        'document.pdf': { type: 'file', size: '1.5 MB' },
+        'image.jpg': { type: 'file', size: '2.8 MB' },
+        'video.mp4': { type: 'file', size: '45.2 MB' },
+        'music.mp3': { type: 'file', size: '8.7 MB' },
+        'archive.zip': { type: 'file', size: '12.3 MB' }
       }
     }
   };
@@ -87,6 +108,8 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }
     if (fileName.endsWith('.mp3') || fileName.endsWith('.wav')) return '🎵';
     if (fileName.endsWith('.mp4') || fileName.endsWith('.avi')) return '🎬';
     if (fileName.endsWith('.py')) return '🐍';
+    if (fileName.endsWith('.pdf')) return '📕';
+    if (fileName.endsWith('.zip')) return '📦';
     return '📄';
   };
 
@@ -176,6 +199,8 @@ export default function FileExplorer({ isOpen, onClose, onMinimize, onSurprise }
                       navigateTo(currentPath + name + '\\');
                     } else if (name === 'surprise.py' && onSurprise) {
                       onSurprise();
+                    } else if (name === 'ddos.py' && onDDoS) {
+                      onDDoS();
                     }
                   }}
                 >

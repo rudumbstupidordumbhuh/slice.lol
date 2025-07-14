@@ -2,13 +2,36 @@ import { useState, useRef, useEffect } from 'react';
 import BaseWindow from './BaseWindow';
 import './WindowStyles.css';
 
-export default function Terminal({ isOpen, onClose, onMinimize, onSurprise }) {
+export default function Terminal({ isOpen, onClose, onMinimize, onSurprise, ddosFlow, ddosStep, setDdosStep, ddosSite, setDdosSite, ddosThreads, setDdosThreads, setDdosFlow }) {
   const [commandHistory, setCommandHistory] = useState([]);
   const [currentCommand, setCurrentCommand] = useState('');
   const [currentPath, setCurrentPath] = useState('C:\\Users\\bu8f>');
   const [output, setOutput] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef(null);
+
+  // DDoS interactive flow
+  useEffect(() => {
+    if (!ddosFlow || !isOpen) return;
+    if (ddosStep === 1) {
+      setOutput(prev => ([...prev, `${currentPath} python ddos.py`, 'Enter target site:']));
+      setCurrentCommand('');
+    } else if (ddosStep === 2) {
+      setOutput(prev => ([...prev, `Target: ${ddosSite}`, 'Enter number of threads:']));
+      setCurrentCommand('');
+    } else if (ddosStep === 3) {
+      setOutput(prev => ([...prev, `Threads: ${ddosThreads}`, `Starting DDoS on ${ddosSite} with ${ddosThreads} threads...`, 'Site is now offline...']));
+      setCurrentCommand('');
+      setTimeout(() => {
+        setOutput(prev => ([...prev, `Site ${ddosSite} is back online!` ]));
+        setDdosFlow(false);
+        setDdosStep(0);
+        setDdosSite('');
+        setDdosThreads('');
+      }, 3000);
+    }
+    // eslint-disable-next-line
+  }, [ddosFlow, ddosStep, isOpen]);
 
   const commands = {
     'help': () => `Available commands:
@@ -127,6 +150,13 @@ Approximate round trip times in milli-seconds:
       if (args === 'surprise.py') {
         onSurprise();
         return 'Executing surprise.py... 🎉';
+      }
+      if (args === 'ddos.py') {
+        if (setDdosFlow && setDdosStep) {
+          setDdosFlow(true);
+          setDdosStep(1);
+        }
+        return '';
       }
       return `Python: can't open file '${args}': [Errno 2] No such file or directory`;
     },
@@ -290,6 +320,19 @@ code.exe                      1456 Console                    1     67,584 K`,
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!currentCommand.trim()) return;
+
+    // DDoS interactive flow
+    if (ddosFlow) {
+      if (ddosStep === 1) {
+        setDdosSite(currentCommand);
+        setDdosStep(2);
+        return;
+      } else if (ddosStep === 2) {
+        setDdosThreads(currentCommand);
+        setDdosStep(3);
+        return;
+      }
+    }
 
     const newOutput = [...output];
     newOutput.push(`${currentPath} ${currentCommand}`);
