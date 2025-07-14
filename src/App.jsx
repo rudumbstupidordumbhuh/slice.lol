@@ -155,7 +155,7 @@ function useMultiLineTypewriter(lines, speed = 32, linePause = 400) {
   return { displayedLines, currentText };
 }
 
-function HandlePage() {
+function HandlePage({ onEnter }) {
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
   const [entered, setEntered] = useState(false);
@@ -350,7 +350,10 @@ function HandlePage() {
       audioRef.current.volume = muted ? 0 : volume;
       audioRef.current.play().catch(() => {});
     }
-    setTimeout(() => setEntered(true), 500); // match CSS transition duration
+    setTimeout(() => {
+      setEntered(true);
+      if (onEnter) onEnter(); // Call the onEnter prop
+    }, 500); // match CSS transition duration
   };
 
   const handleMute = () => {
@@ -769,9 +772,11 @@ function HandlePage() {
 }
 
 function App() {
+  const [entered, setEntered] = useState(false);
+  
   return <>
-    <HandlePage />
-    <Taskbar />
+    <HandlePage onEnter={() => setEntered(true)} />
+    {entered && <Taskbar />}
   </>;
 }
 

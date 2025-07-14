@@ -4,21 +4,54 @@ import './Taskbar.css';
 
 export default function Taskbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [securityToolsOpen, setSecurityToolsOpen] = useState(false);
+  const [activeApp, setActiveApp] = useState(null);
 
   const apps = [
     {
       id: 'security',
-      name: 'Multi-Tool API Hub',
-      icon: '🔧',
-      description: 'Security, Search, Dark Web & Aviation APIs',
-      onClick: () => {
-        setSecurityToolsOpen(true);
-        setMenuOpen(false);
-      }
+      name: 'Security Tools',
+      icon: '🔒',
+      description: 'Analyze files, URLs, IPs & domains',
+      component: SecurityTools
+    },
+    {
+      id: 'search',
+      name: 'Search Engines',
+      icon: '🔍',
+      description: 'Alternative search engines',
+      component: SecurityTools
+    },
+    {
+      id: 'darkweb',
+      name: 'Dark Web',
+      icon: '🌑',
+      description: 'Search .onion sites',
+      component: SecurityTools
+    },
+    {
+      id: 'vulnerabilities',
+      name: 'Vulnerabilities',
+      icon: '🛡️',
+      description: 'CVE database search',
+      component: SecurityTools
+    },
+    {
+      id: 'aviation',
+      name: 'Aviation',
+      icon: '✈️',
+      description: 'Flight data & tracking',
+      component: SecurityTools
     }
-    // Add more apps here in the future
   ];
+
+  const handleAppClick = (app) => {
+    setActiveApp(app);
+    setMenuOpen(false);
+  };
+
+  const closeApp = () => {
+    setActiveApp(null);
+  };
 
   return (
     <>
@@ -41,31 +74,34 @@ export default function Taskbar() {
       {menuOpen && (
         <div className="start-menu" onClick={() => setMenuOpen(false)}>
           <div className="start-menu-inner" onClick={e => e.stopPropagation()}>
-            <div className="start-menu-header">APIs (Apps) Menu</div>
-            <div className="start-menu-apps">
-              {apps.map(app => (
-                <button
-                  key={app.id}
-                  className="app-btn"
-                  onClick={app.onClick}
-                  title={app.description}
-                >
-                  <span className="app-icon">{app.icon}</span>
-                  <div className="app-info">
-                    <div className="app-name">{app.name}</div>
-                    <div className="app-description">{app.description}</div>
-                  </div>
-                </button>
-              ))}
+            <div className="start-menu-header">
+              <div className="start-menu-title">Start</div>
+            </div>
+            <div className="start-menu-content">
+              <div className="start-menu-apps">
+                {apps.map(app => (
+                  <button
+                    key={app.id}
+                    className="start-menu-app"
+                    onClick={() => handleAppClick(app)}
+                  >
+                    <span className="app-icon">{app.icon}</span>
+                    <span className="app-name">{app.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <SecurityTools 
-        isOpen={securityToolsOpen} 
-        onClose={() => setSecurityToolsOpen(false)} 
-      />
+      {activeApp && (
+        <activeApp.component 
+          isOpen={true} 
+          onClose={closeApp}
+          defaultTab={activeApp.id}
+        />
+      )}
     </>
   );
 } 

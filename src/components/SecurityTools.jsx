@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './SecurityTools.css';
+import React from 'react'; // Added missing import for React
 
-export default function SecurityTools({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('url');
+export default function SecurityTools({ isOpen, onClose, defaultTab = 'url' }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [input, setInput] = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,11 @@ export default function SecurityTools({ isOpen, onClose }) {
     { id: 'cve', name: 'Vulnerabilities', icon: '🛡️', category: 'security' },
     { id: 'aviation', name: 'Aviation', icon: '✈️', category: 'aviation' }
   ];
+
+  // Update active tab when defaultTab changes
+  React.useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
