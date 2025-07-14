@@ -774,7 +774,8 @@ function HandlePage({ onEnter }) {
 }
 
 function App() {
-  const [entered, setEntered] = useState(false);
+  // Start on desktop by default
+  const [entered, setEntered] = useState(true);
   const [isStartingUp, setIsStartingUp] = useState(false);
   const [hasPoweredOff, setHasPoweredOff] = useState(false);
 
@@ -792,7 +793,7 @@ function App() {
   };
 
   return <>
-    <HandlePage onEnter={() => setEntered(true)} />
+    {/* Only show login/boot after power off */}
     {!entered && isStartingUp && hasPoweredOff && <WindowsBootAnimation isVisible={true} />}
     {!entered && (!isStartingUp || !hasPoweredOff) && <LoginScreen isVisible={!entered && (!isStartingUp || !hasPoweredOff)} onPowerOn={handlePowerOn} />}
     {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />}
