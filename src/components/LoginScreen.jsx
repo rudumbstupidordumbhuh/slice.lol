@@ -39,7 +39,7 @@ export default function LoginScreen({ isVisible, onPowerOn }) {
       
       {/* Overlay */}
       <div className="login-overlay">
-        {/* Time and date */}
+        {/* Top left - Time and date */}
         <div className="login-time">
           <div className="time-display">
             {currentTime.toLocaleTimeString('en-US', { 
@@ -58,50 +58,57 @@ export default function LoginScreen({ isVisible, onPowerOn }) {
           </div>
         </div>
 
-        {/* Login form area */}
-        <div className="login-container">
-          <div className="user-avatar-large">
-            <div className="avatar-circle">
-              <span className="avatar-icon">👤</span>
+        {/* Center - Login form */}
+        <div className="login-center">
+          <div className="login-form-container">
+            <div className="user-avatar-large">
+              <div className="avatar-circle">
+                <span className="avatar-icon">👤</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="user-name-display">bu8f</div>
-          
-          <div className="login-form">
-            <div className="password-field">
-              <input
-                type="password"
-                placeholder="Enter password"
-                className="password-input"
-                disabled
-              />
-              <div className="password-hint">Press any key to continue</div>
+            
+            <div className="user-name-display">bu8f</div>
+            
+            <div className="login-form">
+              <div className="password-field">
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  className="password-input"
+                  disabled
+                />
+                <div className="password-hint">Press any key to continue</div>
+              </div>
             </div>
-          </div>
 
-          {/* Power on button */}
-          <button 
-            className={`power-on-button ${isPoweringOn ? 'powering-on' : ''}`}
-            onClick={handlePowerOn}
-            disabled={isPoweringOn}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-            {isPoweringOn ? 'Starting...' : 'Power On'}
-          </button>
+            {/* Power on button */}
+            <button 
+              className={`power-on-button ${isPoweringOn ? 'powering-on' : ''}`}
+              onClick={handlePowerOn}
+              disabled={isPoweringOn}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              {isPoweringOn ? 'Starting...' : 'Power On'}
+            </button>
+          </div>
         </div>
 
-        {/* Bottom info */}
+        {/* Bottom right - System info */}
         <div className="login-footer">
-          <div className="network-status">
-            <span className="network-icon">📶</span>
-            <span className="network-text">Connected</span>
-          </div>
-          <div className="battery-status">
-            <span className="battery-icon">🔋</span>
-            <span className="battery-text">100%</span>
+          <div className="system-info">
+            <div className="network-status">
+              <span className="network-icon">📶</span>
+              <span className="network-text">Connected</span>
+            </div>
+            <div className="battery-status">
+              <span className="battery-icon">🔋</span>
+              <span className="battery-text">100%</span>
+            </div>
+            <div className="accessibility-status">
+              <span className="accessibility-icon">♿</span>
+            </div>
           </div>
         </div>
       </div>

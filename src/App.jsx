@@ -777,10 +777,14 @@ function App() {
   const handlePowerOff = () => {
     setEntered(false);
   };
+
+  const handlePowerOn = () => {
+    setEntered(true);
+  };
   
   return <>
     <HandlePage onEnter={() => setEntered(true)} />
-    {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} />}
+    {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />}
   </>;
 }
 

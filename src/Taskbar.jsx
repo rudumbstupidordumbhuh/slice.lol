@@ -8,7 +8,7 @@ import Aviation from './components/Aviation';
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
 
-export default function Taskbar({ isVisible, onPowerOff }) {
+export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [showShutdownAnimation, setShowShutdownAnimation] = useState(false);
@@ -100,8 +100,8 @@ export default function Taskbar({ isVisible, onPowerOff }) {
 
   const handlePowerOn = () => {
     setShowLoginScreen(false);
-    if (onPowerOff) {
-      onPowerOff(); // This will restart the main app
+    if (onPowerOn) {
+      onPowerOn(); // This will restart the main app
     }
   };
 

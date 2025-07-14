@@ -27,11 +27,10 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.2) 0%,
     rgba(0, 0, 0, 0.1) 50%,
-    rgba(0, 0, 0, 0.3) 100%
+    rgba(0, 0, 0, 0.2) 100%
   );
-  backdrop-filter: blur(2px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -49,46 +48,50 @@
   }
 }
 
-/* Time and date section */
+/* Time and date - Top left */
 .login-time {
-  text-align: center;
+  align-self: flex-start;
   color: white;
-  margin-bottom: auto;
-  margin-top: 60px;
+  text-align: left;
+  animation: loginSlideDown 0.6s ease-out 0.2s both;
+}
+
+@keyframes loginSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .time-display {
-  font-size: 6rem;
+  font-size: 4rem;
   font-weight: 300;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  margin-bottom: 10px;
-  letter-spacing: 2px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  line-height: 1;
 }
 
 .date-display {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 400;
   opacity: 0.9;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
 }
 
-/* Login container */
-.login-container {
+/* Center login form */
+.login-center {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: loginSlideUp 0.6s ease-out 0.2s both;
+  animation: loginSlideUp 0.6s ease-out 0.4s both;
 }
 
 @keyframes loginSlideUp {
@@ -102,55 +105,67 @@
   }
 }
 
+.login-form-container {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  min-width: 320px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
 .user-avatar-large {
   margin-bottom: 20px;
 }
 
 .avatar-circle {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #0078d4, #106ebe);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 120, 212, 0.3);
-  border: 3px solid rgba(255, 255, 255, 0.2);
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .avatar-icon {
-  font-size: 40px;
+  font-size: 30px;
   color: white;
 }
 
 .user-name-display {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: white;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .login-form {
-  width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .password-field {
   position: relative;
-  width: 100%;
+  margin-bottom: 15px;
 }
 
 .password-input {
   width: 100%;
-  padding: 15px 20px;
+  padding: 12px 16px;
   background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  text-align: center;
 }
 
 .password-input::placeholder {
@@ -160,39 +175,39 @@
 .password-input:focus {
   outline: none;
   border-color: #0078d4;
-  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
 }
 
 .password-hint {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 /* Power on button */
 .power-on-button {
   background: linear-gradient(135deg, #0078d4, #106ebe);
   border: none;
-  border-radius: 10px;
-  padding: 15px 30px;
+  border-radius: 6px;
+  padding: 10px 20px;
   color: white;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
-  min-width: 150px;
+  gap: 8px;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+  min-width: 120px;
   justify-content: center;
 }
 
 .power-on-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #106ebe, #005a9e);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 120, 212, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
 }
 
 .power-on-button:active:not(:disabled) {
@@ -212,37 +227,44 @@
 
 @keyframes powerOnPulse {
   0%, 100% {
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
   }
   50% {
-    box-shadow: 0 4px 25px rgba(40, 167, 69, 0.6);
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.5);
   }
 }
 
-/* Footer */
+/* Footer - Bottom right */
 .login-footer {
+  align-self: flex-end;
+  animation: loginSlideUp 0.6s ease-out 0.6s both;
+}
+
+.system-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  color: white;
-  font-size: 14px;
-  opacity: 0.8;
+  gap: 15px;
 }
 
 .network-status,
-.battery-status {
+.battery-status,
+.accessibility-status {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 4px;
   backdrop-filter: blur(10px);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .network-icon,
-.battery-icon {
-  font-size: 16px;
+.battery-icon,
+.accessibility-icon {
+  font-size: 14px;
 }
 
 /* Power on animation overlay */
@@ -275,13 +297,13 @@
 }
 
 .loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top: 4px solid #0078d4;
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top: 3px solid #0078d4;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  margin: 0 auto 15px;
 }
 
 @keyframes spin {
@@ -290,7 +312,7 @@
 }
 
 .power-on-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   color: #0078d4;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -303,52 +325,6 @@
   }
 
   .time-display {
-    font-size: 4rem;
-  }
-
-  .date-display {
-    font-size: 1.2rem;
-  }
-
-  .login-container {
-    padding: 30px 20px;
-    margin: 20px;
-  }
-
-  .avatar-circle {
-    width: 60px;
-    height: 60px;
-  }
-
-  .avatar-icon {
-    font-size: 30px;
-  }
-
-  .user-name-display {
-    font-size: 1.3rem;
-  }
-
-  .power-on-button {
-    padding: 12px 25px;
-    font-size: 14px;
-  }
-
-  .login-footer {
-    font-size: 12px;
-  }
-
-  .network-status,
-  .battery-status {
-    padding: 6px 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .login-overlay {
-    padding: 15px;
-  }
-
-  .time-display {
     font-size: 3rem;
   }
 
@@ -356,9 +332,9 @@
     font-size: 1rem;
   }
 
-  .login-container {
-    padding: 25px 15px;
-    margin: 10px;
+  .login-form-container {
+    padding: 30px 20px;
+    min-width: 280px;
   }
 
   .avatar-circle {
@@ -374,23 +350,82 @@
     font-size: 1.1rem;
   }
 
+  .power-on-button {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .system-info {
+    gap: 10px;
+  }
+
+  .network-status,
+  .battery-status,
+  .accessibility-status {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-overlay {
+    padding: 15px;
+  }
+
+  .time-display {
+    font-size: 2.5rem;
+  }
+
+  .date-display {
+    font-size: 0.9rem;
+  }
+
+  .login-form-container {
+    padding: 25px 15px;
+    min-width: 250px;
+  }
+
+  .avatar-circle {
+    width: 45px;
+    height: 45px;
+  }
+
+  .avatar-icon {
+    font-size: 22px;
+  }
+
+  .user-name-display {
+    font-size: 1rem;
+  }
+
   .password-input {
-    padding: 12px 15px;
-    font-size: 14px;
+    padding: 10px 12px;
+    font-size: 13px;
   }
 
   .power-on-button {
-    padding: 10px 20px;
-    font-size: 13px;
+    padding: 7px 14px;
+    font-size: 11px;
+  }
+
+  .system-info {
+    gap: 8px;
+  }
+
+  .network-status,
+  .battery-status,
+  .accessibility-status {
+    padding: 4px 6px;
+    font-size: 10px;
   }
 
   .loading-spinner {
     width: 40px;
     height: 40px;
-    border-width: 3px;
+    border-width: 2px;
   }
 
   .power-on-text {
-    font-size: 16px;
+    font-size: 14px;
   }
 } 
