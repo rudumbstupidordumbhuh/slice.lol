@@ -263,22 +263,9 @@ function HandlePage() {
   });
 
   useEffect(() => {
-    if (entered) {
-      if (!audioRef.current) {
-        const audio = new window.Audio(base + 'care.mp3');
-        audio.loop = true;
-        audio.volume = muted ? 0 : volume;
-        audioRef.current = audio;
-        audio.play().catch(() => {});
-      }
-      if (audioRef.current) {
-        audioRef.current.volume = muted ? 0 : volume;
-        audioRef.current.play().catch(() => {});
-      }
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+    // Only handle volume and mute changes when audio is already playing
+    if (audioRef.current && entered) {
+      audioRef.current.volume = muted ? 0 : volume;
     }
   }, [entered, volume, muted]);
 
@@ -293,7 +280,7 @@ function HandlePage() {
 
   // Add audio loop fallback
   useEffect(() => {
-    if (entered && audioRef.current) {
+    if (audioRef.current) {
       const audio = audioRef.current;
       const onEnded = () => {
         audio.currentTime = 0;
@@ -304,11 +291,11 @@ function HandlePage() {
         audio.removeEventListener('ended', onEnded);
       };
     }
-  }, [entered]);
+  }, [audioRef.current]);
 
   // Track audio time and duration for embed
   useEffect(() => {
-    if (entered && audioRef.current) {
+    if (audioRef.current) {
       const updateTime = () => {
         if (audioRef.current) {
           setAudioTime(audioRef.current.currentTime);
@@ -329,7 +316,7 @@ function HandlePage() {
         }
       };
     }
-  }, [entered]);
+  }, [audioRef.current]);
 
   // Format time mm:ss
   function formatTime(sec) {
@@ -340,6 +327,17 @@ function HandlePage() {
 
   const handleEnter = () => {
     setFadeOut(true);
+    // Start audio immediately when user clicks
+    if (!audioRef.current) {
+      const audio = new window.Audio(base + 'care.mp3');
+      audio.loop = true;
+      audio.volume = muted ? 0 : volume;
+      audioRef.current = audio;
+      audio.play().catch(() => {});
+    } else {
+      audioRef.current.volume = muted ? 0 : volume;
+      audioRef.current.play().catch(() => {});
+    }
     setTimeout(() => setEntered(true), 500); // match CSS transition duration
   };
 
