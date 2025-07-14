@@ -1,6 +1,11 @@
-html, body, * {
-  user-select: text !important;
-  cursor: url('/yo.cur') 15 15, auto;
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  background: #181a1b;
+  color: #8ecfff;
+  min-height: 100vh;
 }
 
 .video-bg-container {
@@ -9,10 +14,17 @@ html, body, * {
   left: 0;
   width: 100vw;
   height: 100vh;
+  z-index: 0;
+  background: #181a1b url('https://www.kali.org/images/kali-dragon-background.svg') no-repeat center center fixed;
+  background-size: cover;
   overflow: hidden;
 }
 
-.background-video, .blurred {
+.background-video {
+  display: none;
+}
+
+.blurred {
   position: fixed;
   top: 0;
   left: 0;
@@ -367,14 +379,16 @@ html, body, * {
 .typewriter-bar {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
-  z-index: 20;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-  background: none;
-  padding-top: 18px;
+  left: 64px;
+  width: calc(100vw - 64px);
+  background: rgba(20, 22, 25, 0.98);
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 1.1rem;
+  padding: 8px 24px;
+  z-index: 1200;
+  border-bottom: 2px solid #3572A5;
+  letter-spacing: 1px;
 }
 .typewriter-text {
   font-family: 'Minecraft Regular', 'Inter', Arial, sans-serif;
@@ -1136,4 +1150,93 @@ html, body, * {
     opacity: 0;
     visibility: hidden;
   }
+}
+
+.window-modal {
+  background: #232629;
+  border: 2px solid #3572A5;
+  border-radius: 12px;
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  box-shadow: 0 8px 32px #000a, 0 1.5px 0 #3572A5;
+}
+
+.window-titlebar {
+  background: #181a1b;
+  border-bottom: 1.5px solid #3572A5;
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.window-title {
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.window-content {
+  background: #232629;
+  color: #8ecfff;
+}
+
+.terminal {
+  background: #181a1b;
+  border: 2px solid #3572A5;
+}
+
+.terminal-content {
+  background: #181a1b;
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.terminal-header {
+  color: #00e6ff;
+  font-weight: bold;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.terminal-line {
+  color: #8ecfff;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.terminal-prompt {
+  color: #00e6ff;
+}
+
+.terminal-input {
+  background: #232629;
+  color: #8ecfff;
+  border: 1.5px solid #3572A5;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+.scan-btn, .toolbar-btn, .power-button {
+  background: #232629;
+  color: #8ecfff;
+  border: 1.5px solid #3572A5;
+  border-radius: 8px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.scan-btn:hover, .toolbar-btn:hover, .power-button:hover {
+  background: #3572A5;
+  color: #fff;
+  border-color: #8ecfff;
+}
+
+input, textarea {
+  background: #232629;
+  color: #8ecfff;
+  border: 1.5px solid #3572A5;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #232629;
+}
+::-webkit-scrollbar-thumb {
+  background: #3572A5;
+  border-radius: 8px;
 }
