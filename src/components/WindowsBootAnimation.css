@@ -1,0 +1,59 @@
+.windows-boot-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #0078d4;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.windows-boot-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.windows-boot-spinner {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 32px;
+}
+
+.boot-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0.85;
+  animation: boot-spin 1.2s linear infinite;
+}
+
+/* Position dots in a circle */
+.boot-dot.dot1 { top: 0; left: 27px; animation-delay: 0s; }
+.boot-dot.dot2 { top: 8px; left: 46px; animation-delay: 0.15s; }
+.boot-dot.dot3 { top: 27px; left: 54px; animation-delay: 0.3s; }
+.boot-dot.dot4 { top: 46px; left: 46px; animation-delay: 0.45s; }
+.boot-dot.dot5 { top: 54px; left: 27px; animation-delay: 0.6s; }
+.boot-dot.dot6 { top: 46px; left: 8px; animation-delay: 0.75s; }
+.boot-dot.dot7 { top: 27px; left: 0; animation-delay: 0.9s; }
+.boot-dot.dot8 { top: 8px; left: 8px; animation-delay: 1.05s; }
+
+@keyframes boot-spin {
+  0% { opacity: 0.2; }
+  30% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.windows-boot-text {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 8px #0006;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin-top: 10px;
+} 

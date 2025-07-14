@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Taskbar from './Taskbar';
+import WindowsBootAnimation from './components/WindowsBootAnimation';
+import LoginScreen from './components/LoginScreen';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -89,7 +91,7 @@ function useMultiLineTypewriter(lines, speed = 32, linePause = 400) {
       let i = 0;
       function typeChar() {
         if (cancelled) return;
-        setCurrentText(line.slice(0, i));
+        setCurrentText(line.slice(0, i));what 
         if (i <= line.length) {
           timeout = setTimeout(() => {
             i++;
@@ -773,17 +775,24 @@ function HandlePage({ onEnter }) {
 
 function App() {
   const [entered, setEntered] = useState(false);
-  
+  const [isStartingUp, setIsStartingUp] = useState(false);
+
   const handlePowerOff = () => {
     setEntered(false);
   };
 
   const handlePowerOn = () => {
-    setEntered(true);
+    setIsStartingUp(true);
+    setTimeout(() => {
+      setIsStartingUp(false);
+      setEntered(true);
+    }, 1500);
   };
   
   return <>
     <HandlePage onEnter={() => setEntered(true)} />
+    {!entered && isStartingUp && <WindowsBootAnimation isVisible={true} />}
+    {!entered && !isStartingUp && <LoginScreen isVisible={!entered && !isStartingUp} onPowerOn={handlePowerOn} />}
     {entered && <Taskbar isVisible={entered} onPowerOff={handlePowerOff} onPowerOn={handlePowerOn} />}
   </>;
 }

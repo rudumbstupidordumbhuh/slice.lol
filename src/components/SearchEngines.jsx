@@ -45,6 +45,14 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
     }
   };
 
+  const handleTabSwitch = (tabId) => {
+    setActiveTab(tabId);
+    setInput('');
+    setResults(null);
+    setError('');
+    setLoading(false);
+  };
+
   const searchMemex = async (query) => {
     // Memex Marginalia API (free) - using CORS proxy
     const corsProxy = 'https://cors-anywhere.herokuapp.com/';
@@ -217,7 +225,7 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
               <button
                 key={tab.id}
                 className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabSwitch(tab.id)}
               >
                 <span className="tab-icon">{tab.icon}</span>
                 {tab.name}
