@@ -48,7 +48,20 @@ const YouTubePlayer = ({ videoId, onVideoReady, onTimeUpdate, onDurationChange, 
         showinfo: 0,
         mute: muted ? 1 : 0,
         loop: 1,
-        playlist: videoId
+        playlist: videoId,
+        playsinline: 1,
+        origin: window.location.origin,
+        widget_referrer: window.location.origin,
+        color: 'white',
+        hl: 'en',
+        cc_load_policy: 0,
+        iv_load_policy: 3,
+        modestbranding: 1,
+        rel: 0,
+        showinfo: 0,
+        start: 0,
+        end: 0,
+        vq: 'medium'
       },
       events: {
         onReady: onPlayerReady,
@@ -132,7 +145,8 @@ const YouTubePlayer = ({ videoId, onVideoReady, onTimeUpdate, onDurationChange, 
         left: 0,
         width: '100%',
         height: '100%',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        zIndex: 0
       }}
     />
   );

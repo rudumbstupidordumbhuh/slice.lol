@@ -769,6 +769,34 @@ html, body, * {
   }
 }
 
+/* Hide YouTube player controls */
+#youtube-player iframe {
+  pointer-events: none !important;
+}
+
+#youtube-player .ytp-chrome-top,
+#youtube-player .ytp-chrome-bottom,
+#youtube-player .ytp-pause-overlay,
+#youtube-player .ytp-watermark,
+#youtube-player .ytp-show-cards-title,
+#youtube-player .ytp-gradient-top,
+#youtube-player .ytp-gradient-bottom,
+#youtube-player .ytp-large-play-button,
+#youtube-player .ytp-button,
+#youtube-player .ytp-controls,
+#youtube-player .ytp-title,
+#youtube-player .ytp-progress-bar,
+#youtube-player .ytp-time-display,
+#youtube-player .ytp-volume-panel,
+#youtube-player .ytp-settings-button,
+#youtube-player .ytp-fullscreen-button,
+#youtube-player .ytp-youtube-button,
+#youtube-player .ytp-branding-button {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   /* General mobile adjustments */
