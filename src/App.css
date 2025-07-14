@@ -767,3 +767,344 @@ html, body, * {
     transform: scale(0.9);
   }
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  /* General mobile adjustments */
+  html, body, * {
+    cursor: default !important;
+  }
+  
+  /* Video background mobile optimization */
+  .background-video {
+    object-position: center;
+  }
+  
+  /* Centered text adjustments for mobile */
+  .centered-bg-text {
+    font-size: 12px;
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+    padding: 0 10px;
+  }
+  
+  /* View counter mobile positioning */
+  .centered-view-counter {
+    top: calc(50% + 20px);
+    font-size: 14px;
+    padding: 3px 12px 3px 8px;
+    margin-top: 6px;
+  }
+  
+  .centered-view-counter svg {
+    margin-right: 5px;
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Sound bar mobile adjustments */
+  .sound-bar {
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px 6px 8px;
+    border-radius: 12px;
+  }
+  
+  .sound-bar svg {
+    margin-right: 5px;
+    width: 14px;
+    height: 14px;
+  }
+  
+  .sound-bar input[type="range"] {
+    width: 70px;
+    height: 4px;
+  }
+  
+  /* Entry overlay mobile */
+  .entry-message {
+    font-size: 20px;
+    padding: 0 20px;
+  }
+  
+  .typewriter-entry {
+    font-size: 20px;
+  }
+  
+  /* Fixed view counter mobile positioning */
+  .fixed-view-counter {
+    left: 50%;
+    bottom: 40vh;
+    transform: translateX(-50%);
+    font-size: 10px;
+  }
+  
+  /* Badge container mobile */
+  .badge-container {
+    margin-top: 30px;
+    gap: 8px;
+  }
+  
+  .badge-container .small-badge + .small-badge {
+    margin-left: -8px;
+  }
+  
+  /* Typewriter bar mobile */
+  .typewriter-bar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  
+  .typewriter-text {
+    font-size: 10px;
+  }
+  
+  /* Song embed mobile adjustments */
+  .song-embed {
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  
+  .song-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+  }
+  
+  .song-info {
+    margin-left: 10px;
+    flex: 1;
+  }
+  
+  .song-title {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  
+  .song-artist {
+    font-size: 10px;
+  }
+  
+  .song-time {
+    font-size: 10px;
+    margin-left: 8px;
+  }
+  
+  .song-bar-wrap {
+    margin-top: 6px;
+  }
+  
+  .song-bar-bg {
+    height: 2px;
+  }
+  
+  .song-bar-fg {
+    height: 2px;
+  }
+  
+  .song-embed-btns {
+    margin-top: 8px;
+    gap: 8px;
+  }
+  
+  .song-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+    border-radius: 6px;
+  }
+  
+  /* IP display mobile */
+  .ip-display {
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  
+  .ip-label {
+    font-size: 10px;
+  }
+  
+  .ip-address {
+    font-size: 12px;
+    max-width: 100px;
+  }
+  
+  .address-label {
+    font-size: 10px;
+    margin-top: 6px;
+  }
+  
+  .address-text {
+    font-size: 10px;
+    max-width: 100px;
+  }
+  
+  .address-detail {
+    font-size: 10px;
+  }
+  
+  .map-link {
+    font-size: 10px;
+  }
+  
+  /* Social links mobile */
+  .social-links {
+    top: calc(50% + 60px);
+    gap: 10px;
+  }
+  
+  .social-btn {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+  }
+  
+  .social-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Bubble trail mobile optimization */
+  .bubble-trail {
+    animation-duration: 0.8s;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .centered-bg-text {
+    font-size: 11px;
+    padding: 0 8px;
+  }
+  
+  .centered-view-counter {
+    font-size: 12px;
+    padding: 2px 10px 2px 6px;
+  }
+  
+  .entry-message {
+    font-size: 18px;
+  }
+  
+  .typewriter-entry {
+    font-size: 18px;
+  }
+  
+  .song-embed {
+    width: 260px;
+    padding: 8px 10px;
+  }
+  
+  .song-thumb {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .song-title {
+    font-size: 11px;
+  }
+  
+  .song-artist {
+    font-size: 9px;
+  }
+  
+  .song-time {
+    font-size: 9px;
+  }
+  
+  .ip-display {
+    width: 180px;
+    padding: 8px 10px;
+  }
+  
+  .social-links {
+    gap: 8px;
+  }
+  
+  .social-btn {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .social-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .centered-bg-text {
+    font-size: 10px;
+  }
+  
+  .centered-view-counter {
+    top: calc(50% + 15px);
+    font-size: 12px;
+  }
+  
+  .song-embed {
+    top: 50px;
+  }
+  
+  .ip-display {
+    top: 100px;
+  }
+  
+  .social-links {
+    top: calc(50% + 40px);
+  }
+  
+  .fixed-view-counter {
+    bottom: 35vh;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .social-btn:hover {
+    transform: none;
+  }
+  
+  .song-btn:hover {
+    transform: none;
+  }
+  
+  .mute-btn:hover {
+    transform: none;
+  }
+  
+  /* Increase touch targets */
+  .social-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .song-btn {
+    min-height: 36px;
+  }
+  
+  .mute-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .owner-badge:hover .badge-tooltip,
+  .owner-badge:focus .badge-tooltip {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

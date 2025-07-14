@@ -538,10 +538,14 @@ function HandlePage() {
     };
   }, []);
 
-  // Bubble trail effect
+  // Mobile detection
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  // Bubble trail effect (desktop only)
   useEffect(() => {
-    // Only enable bubble trail after user has entered
-    if (!entered) return;
+    // Only enable bubble trail after user has entered and on desktop
+    if (!entered || isMobile || isTouchDevice) return;
 
     const handleMouseMove = (e) => {
       const currentPos = { x: e.clientX, y: e.clientY };
@@ -589,7 +593,57 @@ function HandlePage() {
         clearTimeout(mouseMoveTimeout.current);
       }
     };
-  }, [entered]);
+  }, [entered, isMobile, isTouchDevice]);
+
+  // Mobile-specific optimizations
+  useEffect(() => {
+    if (isMobile || isTouchDevice) {
+      // Prevent zoom on double tap
+      let lastTouchEnd = 0;
+      const preventZoom = (e) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      };
+      
+      document.addEventListener('touchend', preventZoom, false);
+      
+      // Prevent pull-to-refresh on mobile
+      const preventPullToRefresh = (e) => {
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const startY = touch.clientY;
+        
+        const handleTouchMove = (e) => {
+          const touch = e.touches[0];
+          const currentY = touch.clientY;
+          const diff = currentY - startY;
+          
+          if (diff > 0 && window.scrollY === 0) {
+            e.preventDefault();
+          }
+        };
+        
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        
+        const handleTouchEnd = () => {
+          document.removeEventListener('touchmove', handleTouchMove);
+          document.removeEventListener('touchend', handleTouchEnd);
+        };
+        
+        document.addEventListener('touchend', handleTouchEnd);
+      };
+      
+      document.addEventListener('touchstart', preventPullToRefresh, { passive: false });
+      
+      return () => {
+        document.removeEventListener('touchend', preventZoom);
+        document.removeEventListener('touchstart', preventPullToRefresh);
+      };
+    }
+  }, [isMobile, isTouchDevice]);
 
   return (
     <div className="video-bg-container">
