@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
+import Taskbar from './Taskbar';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -67,7 +68,7 @@ function useTypewriterEntry(text, speed = 120, pause = 1200) {
       clearTimeout(timeout);
     };
   }, [text, speed, pause]);
-  return displayed;
+  return displayed; 
 }
 
 function useMultiLineTypewriter(lines, speed = 32, linePause = 400) {
@@ -768,7 +769,10 @@ function HandlePage() {
 }
 
 function App() {
-  return <HandlePage />;
+  return <>
+    <HandlePage />
+    <Taskbar />
+  </>;
 }
 
 export default App;
