@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
+import SongSearcher from './components/SongSearcher.jsx';
+import YouTubePlayer from './components/YouTubePlayer.jsx';
 
 function useTypewriter(text, speed = 50, loop = false, onStep) {
   const [displayed, setDisplayed] = useState('');
@@ -171,6 +173,9 @@ function HandlePage() {
   const [locationDetails, setLocationDetails] = useState(null);
   const [bubbles, setBubbles] = useState([]);
   const [muteAnimation, setMuteAnimation] = useState(false);
+  const [showSongSearcher, setShowSongSearcher] = useState(false);
+  const [currentYouTubeVideo, setCurrentYouTubeVideo] = useState(null);
+  const [youtubePlayer, setYoutubePlayer] = useState(null);
   const lastMousePos = useRef({ x: 0, y: 0 });
   const mouseMoveTimeout = useRef(null);
 
@@ -263,11 +268,21 @@ function HandlePage() {
   });
 
   useEffect(() => {
-    // Only handle volume and mute changes when audio is already playing
-    if (audioRef.current && entered) {
+    // Handle volume and mute changes for both local audio and YouTube
+    if (audioRef.current && entered && !currentYouTubeVideo) {
       audioRef.current.volume = muted ? 0 : volume;
     }
-  }, [entered, volume, muted]);
+    
+    // Handle YouTube player volume
+    if (youtubePlayer && currentYouTubeVideo) {
+      if (muted) {
+        youtubePlayer.mute();
+      } else {
+        youtubePlayer.unMute();
+        youtubePlayer.setVolume(volume * 100);
+      }
+    }
+  }, [entered, volume, muted, currentYouTubeVideo, youtubePlayer]);
 
   useEffect(() => {
     return () => {
@@ -327,8 +342,13 @@ function HandlePage() {
 
   const handleEnter = () => {
     setFadeOut(true);
-    // Start audio immediately when user clicks
-    if (!audioRef.current) {
+    
+    // Start audio/video immediately when user clicks
+    if (currentYouTubeVideo && youtubePlayer) {
+      // Start YouTube video
+      youtubePlayer.playVideo();
+    } else if (!audioRef.current) {
+      // Start local audio
       const audio = new window.Audio(base + 'care.mp3');
       audio.loop = true;
       audio.volume = muted ? 0 : volume;
@@ -338,6 +358,7 @@ function HandlePage() {
       audioRef.current.volume = muted ? 0 : volume;
       audioRef.current.play().catch(() => {});
     }
+    
     setTimeout(() => setEntered(true), 500); // match CSS transition duration
   };
 
@@ -347,11 +368,43 @@ function HandlePage() {
     setTimeout(() => setMuteAnimation(false), 300);
   };
 
-  // Song info
-  const songTitle = 'Overseas';
-  const songArtist = 'Ken Carson';
+  // Song info - dynamic based on selection
+  const [songTitle, setSongTitle] = useState('Overseas');
+  const [songArtist, setSongArtist] = useState('Ken Carson');
+  const [songThumb, setSongThumb] = useState(base + 'yk.png');
   const songFile = 'https://cdn.discordapp.com/attachments/1393371863542923368/1393372001975930993/video.mp4?ex=6872ee4c&is=68719ccc&hm=fb3f9fbc9913e832999726aa1a57d20f4d412bc4ce50ab5b93c067a940026494&';
-  const songThumb = base + 'yk.png';
+
+  // Handle song selection from searcher
+  const handleSongSelect = (song) => {
+    setSongTitle(song.title);
+    setSongArtist(song.artist);
+    setSongThumb(song.thumbnail);
+    setCurrentYouTubeVideo(song.id);
+    
+    // Stop current audio if playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  };
+
+  // Handle YouTube player ready
+  const handleYouTubeReady = (player) => {
+    setYoutubePlayer(player);
+    if (entered) {
+      player.playVideo();
+    }
+  };
+
+  // Handle YouTube time updates
+  const handleYouTubeTimeUpdate = (time) => {
+    setAudioTime(time);
+  };
+
+  // Handle YouTube duration change
+  const handleYouTubeDurationChange = (duration) => {
+    setAudioDuration(duration);
+  };
 
   // Share handler
   function handleShare(e) {
@@ -659,15 +712,30 @@ function HandlePage() {
           }}
         />
       ))}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="background-video"
-        src="/video.mp4"
-        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
-      />
+      {/* Background video or YouTube video */}
+      {currentYouTubeVideo ? (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
+          <YouTubePlayer
+            videoId={currentYouTubeVideo}
+            onVideoReady={handleYouTubeReady}
+            onTimeUpdate={handleYouTubeTimeUpdate}
+            onDurationChange={handleYouTubeDurationChange}
+            isPlaying={entered}
+            volume={volume}
+            muted={muted}
+          />
+        </div>
+      ) : (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="background-video"
+          src="/video.mp4"
+          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0 }}
+        />
+      )}
       {!entered && (
         <div className={`entry-overlay${fadeOut ? ' fade-out' : ''}`} onClick={handleEnter}>
           <div className="entry-message">
@@ -718,6 +786,16 @@ function HandlePage() {
                 </div>
               </div>
             </div>
+            <div className="song-embed-btns">
+              <button className="song-btn" onClick={() => setShowSongSearcher(true)}>
+                🔍 Search
+              </button>
+              {currentYouTubeVideo && (
+                <button className="song-btn" onClick={handleShare}>
+                  📤 Share
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="sound-bar">
@@ -754,6 +832,13 @@ function HandlePage() {
           ))}
         </div>
       )}
+
+      {/* Song Searcher Modal */}
+      <SongSearcher
+        isVisible={showSongSearcher}
+        onSongSelect={handleSongSelect}
+        onClose={() => setShowSongSearcher(false)}
+      />
     </div>
   );
 }
