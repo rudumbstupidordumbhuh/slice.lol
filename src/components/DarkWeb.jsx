@@ -208,14 +208,6 @@ export default function DarkWeb({ isOpen, onClose, onMinimize }) {
           )}
 
           {renderResults()}
-
-          <div className="api-info">
-            <h4>📋 API Information</h4>
-            <ul>
-              <li><strong>Darksearch.io:</strong> .onion site search (free)</li>
-              <li><strong>Onion Lookup:</strong> Hidden service metadata (free)</li>
-            </ul>
-          </div>
         </div>
       </BaseWindow>
     );

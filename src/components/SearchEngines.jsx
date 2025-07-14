@@ -240,15 +240,6 @@ export default function SearchEngines({ isOpen, onClose, onMinimize }) {
           )}
 
           {renderResults()}
-
-          <div className="api-info">
-            <h4>📋 API Information</h4>
-            <ul>
-              <li><strong>Memex Marginalia:</strong> Alternative search (free)</li>
-              <li><strong>Serpstack:</strong> Google results to JSON (free)</li>
-              <li><strong>DuckDuckGo:</strong> Instant answers (free)</li>
-            </ul>
-          </div>
         </div>
       </BaseWindow>
     );

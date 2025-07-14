@@ -266,15 +266,6 @@ export default function Vulnerabilities({ isOpen, onClose, onMinimize }) {
           )}
 
           {renderResults()}
-
-          <div className="api-info">
-            <h4>📋 API Information</h4>
-            <ul>
-              <li><strong>NVD:</strong> National Vulnerability Database (free)</li>
-              <li><strong>OpenCVE:</strong> CVE information and tracking (free)</li>
-              <li><strong>KEVin:</strong> Known Exploited Vulnerabilities (free)</li>
-            </ul>
-          </div>
         </div>
       </BaseWindow>
     );

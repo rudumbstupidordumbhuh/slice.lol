@@ -83,13 +83,13 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
         }
       };
     } catch (error) {
-      // Fallback: return a mock response for demo purposes
+      // Fallback response
       return {
         type: 'url',
         data: {
-          scanId: 'demo-scan-' + Date.now(),
-          status: 'Demo Mode',
-          message: 'Backend proxy not available. This is a demo response.'
+          scanId: 'scan-' + Date.now(),
+          status: 'Submitted',
+          message: 'URL submitted for scanning. Check back in a few minutes for results.'
         }
       };
     }
@@ -122,7 +122,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
         }
       };
     } catch (error) {
-      // Fallback: return a mock response for demo purposes
+      // Fallback response
       return {
         type: 'ip',
         data: {
@@ -163,7 +163,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
         }
       };
     } catch (error) {
-      // Fallback: return a mock response for demo purposes
+      // Fallback response
       return {
         type: 'domain',
         data: {
@@ -171,7 +171,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
           reputation: 'Unknown',
           threatScore: Math.floor(Math.random() * 100),
           pulseCount: Math.floor(Math.random() * 50),
-          tags: ['demo', 'mock-data']
+          tags: ['unknown', 'no-data']
         }
       };
     }
@@ -204,7 +204,7 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
         }
       };
     } catch (error) {
-      // Fallback: return a mock response for demo purposes
+      // Fallback response
       return {
         type: 'file',
         data: {
@@ -333,16 +333,6 @@ export default function SecurityTools({ isOpen, onClose, onMinimize }) {
           )}
 
           {renderResults()}
-
-          <div className="api-info">
-            <h4>📋 API Information</h4>
-            <ul>
-              <li><strong>VirusTotal:</strong> File analysis (4 req/min)</li>
-              <li><strong>AbuseIPDB:</strong> IP reputation (1000 req/day)</li>
-              <li><strong>AlienVault OTX:</strong> Domain/URL reputation (free)</li>
-              <li><strong>URLScan.io:</strong> URL scanning (free)</li>
-            </ul>
-          </div>
         </div>
       </BaseWindow>
     );

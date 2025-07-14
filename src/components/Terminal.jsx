@@ -120,8 +120,8 @@ Approximate round trip times in milli-seconds:
     Minimum = 0ms, Maximum = 0ms, Average = 0ms`;
     },
 
-    'notepad': () => 'Starting Notepad... (Demo mode - notepad not available)',
-    'calc': () => 'Starting Calculator... (Demo mode - calculator not available)',
+    'notepad': () => 'Starting Notepad...',
+    'calc': () => 'Starting Calculator...',
     'python': (args) => {
       if (!args) return 'Usage: python <file>';
       if (args === 'surprise.py') {

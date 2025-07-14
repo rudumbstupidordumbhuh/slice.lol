@@ -13,7 +13,6 @@ export default function BaseWindow({
 }) {
   const [isMinimizing, setIsMinimizing] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const { windowRef, position, handleMouseDown } = useWindowDrag();
 
   const handleMinimize = () => {
     setIsMinimizing(true);
@@ -34,21 +33,16 @@ export default function BaseWindow({
   if (!isOpen) return null;
 
   const windowClasses = `window-modal ${className} ${isMinimizing ? 'minimizing' : ''} ${isClosing ? 'closing' : ''}`;
-  const titlebarClasses = `window-titlebar ${isMinimizing || isClosing ? 'dragging' : ''}`;
-  const overlayClasses = `window-overlay ${isDragging ? 'dragging' : ''}`;
+  const titlebarClasses = `window-titlebar`;
+  const overlayClasses = `window-overlay`;
 
   return (
     <div className={overlayClasses}>
       <div 
-        ref={windowRef}
         className={windowClasses}
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px)`
-        }}
       >
         <div 
           className={titlebarClasses}
-          onMouseDown={handleMouseDown}
         >
           <div className="window-title">
             <span className="window-icon">{icon}</span>

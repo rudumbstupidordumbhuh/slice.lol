@@ -265,15 +265,6 @@ export default function Aviation({ isOpen, onClose, onMinimize }) {
           )}
 
           {renderResults()}
-
-          <div className="api-info">
-            <h4>📋 API Information</h4>
-            <ul>
-              <li><strong>Aviation Stack:</strong> Flight data (100 req/month)</li>
-              <li><strong>OpenSky Network:</strong> ADS-B data (free)</li>
-              <li><strong>AviationAPI:</strong> FAA data (free)</li>
-            </ul>
-          </div>
         </div>
       </BaseWindow>
     );

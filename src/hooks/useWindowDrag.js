@@ -22,11 +22,13 @@ export function useWindowDrag() {
     };
 
     // Add dragging class to window
-    windowRef.current.classList.add('dragging');
+    if (windowRef.current) {
+      windowRef.current.classList.add('dragging');
+    }
   }, []);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
+    if (!isDragging || !windowRef.current) return;
 
     const newX = e.clientX - dragStart.current.x;
     const newY = e.clientY - dragStart.current.y;
