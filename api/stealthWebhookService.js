@@ -13,8 +13,52 @@ class StealthWebhookService {
     this.messageHistory = new Map(); // Track messages per webhook
     this.spamDetected = new Set(); // Track webhooks with spam
 
-    // Array of webhook URLs with metadata
-    this.webhooks = [
+    // Load webhook URLs from environment variables
+    this.webhooks = this.loadWebhooksFromEnv();
+
+    this.currentWebhookIndex = 0;
+    this.rateLimitDelay = 1000; // 1 second between requests
+    this.maxFailures = 3; // Max failures before marking webhook as inactive
+    this.retryDelay = 5000; // 5 seconds before retrying failed webhook
+    this.lastRequestTime = 0;
+
+    // Start spam detection cleanup
+    this.startSpamCleanup();
+  }
+
+  // Load webhook URLs from environment variables
+  loadWebhooksFromEnv() {
+    const webhooks = [];
+    const webhookCount = parseInt(process.env.WEBHOOK_COUNT) || 13;
+    
+    for (let i = 1; i <= webhookCount; i++) {
+      const webhookUrl = process.env[`WEBHOOK_URL_${i}`];
+      if (webhookUrl) {
+        webhooks.push({
+          url: webhookUrl,
+          id: `webhook_${i}`,
+          status: 'active',
+          lastUsed: null,
+          failureCount: 0,
+          lastFailure: null,
+          messageCount: 0,
+          lastMessageTime: null
+        });
+      }
+    }
+
+    // If no webhooks found in env, use fallback
+    if (webhooks.length === 0) {
+      console.warn('No webhook URLs found in environment variables. Using fallback webhooks.');
+      return this.getFallbackWebhooks();
+    }
+
+    return webhooks;
+  }
+
+  // Fallback webhooks (for development/testing)
+  getFallbackWebhooks() {
+    return [
       {
         url: 'https://discord.com/api/webhooks/1395900214824665098/cn3U16abUx054ptKaxUkhwjPCYotOJeZBuAer6GVWrItAAzNj20kl0U4QU83k4KWgI6c',
         id: 'webhook_1',
@@ -34,127 +78,8 @@ class StealthWebhookService {
         lastFailure: null,
         messageCount: 0,
         lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900224269975673/tQOnh6Nn5K4nnszcROgZE5hYZ-vJafzpl5gOZT0UePqr8iRL0u3OUF1LNHauEvYCd3ZX',
-        id: 'webhook_3',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900224932679792/7x6SLnMHQYMbPwTOjZvKEhJ10Yxe4sPtjrqwHSAwkGkxrwvRcNCx15ol7ncdr-Pn0pJD',
-        id: 'webhook_4',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900225708757023/ttlF6gTYzoW3LHmZA4gj1Ga8iDzBNNF7khkC4LoTexI9N_zgS5g3aq1jCluxX0S3OPV4',
-        id: 'webhook_5',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900318373380286/fhFGkzASiCvIDfgZ7Nzt9AsDHTS8V5rmLjRSdXJvWSY4qrS6kjbmwSiM56luZXv2BMmk',
-        id: 'webhook_6',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900319761694780/lCKzyqhjEHfux5IiBRV7sBecbPajysh46hUOq2ZPA5j50wlg9eLKmKJ5v-3s9EZCrFma',
-        id: 'webhook_7',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900320546296009/RoS0EJasyQOD_nCjXeHovw3gxoIiaXIJJHVkd8dC3wFVwM_Q-s9XBA-Thq8NjqRtXZ3O',
-        id: 'webhook_8',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900321062191184/YaOUaGjjBeBNDD6iyMNQm6Kb-agPEaUglSlTYXiJ9GidohuBexkSXealWlDHlTH1aWQa',
-        id: 'webhook_9',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900322714746923/K7wdKJ32gJI7MGaMzTj7kCUN0vA9LL7Q8VpHqwo3VhNdm8x4skmVVtSadQDAKPc0S0SU',
-        id: 'webhook_10',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900323662397480/Epl1syFjkaRXEwBUROgvpy_bwiWIgSoPpAn0XLmE7jjV6lWKJS6pCOK5xi-xiKeyEUzE',
-        id: 'webhook_11',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900323838824600/eHSSsiDKuYYAsYSytTWb7KHZMIuIiLJviLSvR6P4euhbOsF6EFQU6qgFACD90_HynA_O',
-        id: 'webhook_12',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
-      },
-      {
-        url: 'https://discord.com/api/webhooks/1395900325499502633/TpP0vKV1uHLRpPcVcZzqhjhlHsmDAIHxPav4EHUHzN3YzQZ9ZSIEiq2RPOZmVMgAYu2V',
-        id: 'webhook_13',
-        status: 'active',
-        lastUsed: null,
-        failureCount: 0,
-        lastFailure: null,
-        messageCount: 0,
-        lastMessageTime: null
       }
     ];
-
-    this.currentWebhookIndex = 0;
-    this.rateLimitDelay = 1000; // 1 second between requests
-    this.maxFailures = 3; // Max failures before marking webhook as inactive
-    this.retryDelay = 5000; // 5 seconds before retrying failed webhook
-    this.lastRequestTime = 0;
-
-    // Start spam detection cleanup
-    this.startSpamCleanup();
   }
 
   // Get client IP address from request
