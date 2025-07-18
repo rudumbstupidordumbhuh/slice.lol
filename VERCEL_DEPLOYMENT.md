@@ -16,6 +16,7 @@ Add these environment variables in Vercel:
 | `DISCORD_CHANNEL_ID` | `YOUR_CHANNEL_ID_HERE` | Production |
 | `WEBSITE_NAME` | `YOUR_WEBSITE_NAME_HERE` | Production |
 | `WEBHOOK_COUNT` | `13` | Production |
+| `ENABLE_BOT` | `true` | Production |
 
 ### 3. Add Webhook URLs
 Add these webhook URL environment variables (replace with your actual webhook URLs):
