@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
+require('dotenv').config({ path: './token.env' });
 const StealthWebhookService = require('./api/stealthWebhookService');
 
 class BotKeepAlive {

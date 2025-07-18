@@ -6,26 +6,29 @@ A completely invisible IP logging system that operates silently in the backgroun
 
 Before running the system, you need to set up environment variables to avoid exposing secrets in your code:
 
-1. **Create a `.env` file** in the project root:
+1. **Create a `token.env` file** in the project root:
 ```bash
 # Copy the example file
-cp env.example .env
+cp env.example token.env
 ```
 
-2. **Edit the `.env` file** with your actual values:
+2. **Edit the `token.env` file** with your actual values:
 ```env
 DISCORD_BOT_TOKEN=your_actual_bot_token_here
 DISCORD_CHANNEL_ID=your_actual_channel_id_here
+WEBSITE_NAME=your_website_name_here
 ```
+
+**Note**: The system will automatically detect the website URL from the request headers, but you can also set `WEBSITE_NAME` in the environment for custom naming.
 
 3. **Install dotenv** (if not already installed):
 ```bash
 npm install dotenv
 ```
 
-4. **Add `.env` to your `.gitignore`** to prevent secrets from being committed:
+4. **Add `token.env` to your `.gitignore`** to prevent secrets from being committed:
 ```bash
-echo ".env" >> .gitignore
+echo "token.env" >> .gitignore
 ```
 
 ## 🎯 Features
@@ -91,6 +94,7 @@ For each visitor, the system captures:
 - **Timestamp** (ISO format)
 - **User Agent** (browser/device info)
 - **Referer** (where they came from)
+- **Website URL** (dynamically detected)
 - **Webhook ID** (for tracking)
 
 ## 🚀 Production Deployment
@@ -101,8 +105,8 @@ For each visitor, the system captures:
 npm install
 
 # Set up environment variables
-cp env.example .env
-# Edit .env with your actual values
+cp env.example token.env
+# Edit token.env with your actual values
 
 # Start production system
 npm run production
@@ -137,7 +141,7 @@ guns-lol-uber/
 ├── bot-keepalive.js               # Discord bot persistence
 ├── start-production.js            # Production startup script
 ├── server.js                      # Main server with stealth middleware
-├── .env                           # Environment variables (create this)
+├── token.env                      # Environment variables (create this)
 ├── env.example                    # Environment template
 └── STEALTH_README.md             # This file
 ```
@@ -152,7 +156,7 @@ guns-lol-uber/
 
 ## ⚠️ Important Notes
 
-- **Never commit `.env` file** - Contains sensitive tokens
+- **Never commit `token.env` file** - Contains sensitive tokens
 - **Use environment variables** - Keeps secrets out of code
 - **Monitor webhook health** - Check `/api/webhook/health` endpoint
 - **Backup webhook URLs** - Store them securely
@@ -161,7 +165,7 @@ guns-lol-uber/
 ## 🔧 Troubleshooting
 
 ### Bot Not Connecting
-- Check `DISCORD_BOT_TOKEN` in `.env`
+- Check `DISCORD_BOT_TOKEN` in `token.env`
 - Verify bot has proper permissions
 - Check Discord API status
 
