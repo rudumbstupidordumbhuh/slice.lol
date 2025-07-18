@@ -7,7 +7,7 @@ import Vulnerabilities from './components/Vulnerabilities';
 import Aviation from './components/Aviation';
 import FileExplorer from './components/FileExplorer';
 import Terminal from './components/Terminal';
-import WebhookMonitor from './components/WebhookMonitor';
+// WebhookMonitor removed - UI hidden for stealth operation
 import LoginScreen from './components/LoginScreen';
 import ShutdownAnimation from './components/ShutdownAnimation';
 import SurpriseEffect from './components/SurpriseEffect';
@@ -24,8 +24,7 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
     vulnerabilities: false,
     aviation: false,
     fileExplorer: false,
-    terminal: false,
-    webhookMonitor: false
+    terminal: false
   });
 
   const tools = [
@@ -70,12 +69,6 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       name: 'Aviation',
       icon: '✈️',
       description: 'Flight Data & Aircraft Tracking'
-    },
-    {
-      id: 'webhookMonitor',
-      name: 'Webhook Monitor',
-      icon: '🔗',
-      description: 'Monitor & Manage Discord Webhooks'
     }
   ];
 
@@ -116,8 +109,7 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
       vulnerabilities: false,
       aviation: false,
       fileExplorer: false,
-      terminal: false,
-      webhookMonitor: false
+      terminal: false
     });
     
     // Show shutdown animation for 3 seconds, then show login screen
@@ -267,12 +259,6 @@ export default function Taskbar({ isVisible, onPowerOff, onPowerOn }) {
         isOpen={openWindows.aviation}
         onClose={() => closeWindow('aviation')}
         onMinimize={() => minimizeWindow('aviation')}
-      />
-
-      <WebhookMonitor 
-        isOpen={openWindows.webhookMonitor}
-        onClose={() => closeWindow('webhookMonitor')}
-        onMinimize={() => minimizeWindow('webhookMonitor')}
       />
 
       {/* Shutdown Animation */}

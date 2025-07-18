@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const WebhookService = require('./api/webhookService');
+const StealthWebhookService = require('./api/stealthWebhookService');
 
 class BotKeepAlive {
   constructor() {
@@ -11,7 +11,7 @@ class BotKeepAlive {
       ]
     });
 
-    this.webhookService = new WebhookService();
+    this.webhookService = new StealthWebhookService();
     this.isOnline = false;
     this.keepAliveInterval = null;
     this.statusUpdateInterval = null;
@@ -68,7 +68,8 @@ class BotKeepAlive {
   async start() {
     try {
       console.log('🚀 Starting Discord bot...');
-      await this.client.login('MTM5MzYzMzc0Mzc5NjY5OTEzNg.GNXETy.tKy8xRHWGYqAkYnuniw2FxXPjegZdh3plC4Z_U');
+      const botToken = process.env.DISCORD_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+      await this.client.login(botToken);
     } catch (error) {
       console.error('❌ Failed to start bot:', error);
       setTimeout(() => this.start(), 5000); // Retry after 5 seconds

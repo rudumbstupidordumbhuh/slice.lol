@@ -1,11 +1,17 @@
+// Load environment variables
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
 
-// Import webhook routes and bot
-const webhookRoutes = require('./api/webhookRoutes');
+// Import stealth webhook service and bot
+const StealthWebhookService = require('./api/stealthWebhookService');
 const bot = require('./bot-keepalive');
+
+// Create stealth webhook service instance
+const stealthWebhookService = new StealthWebhookService();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,8 +27,24 @@ app.use(express.json());
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Webhook API routes
-app.use('/api/webhook', webhookRoutes);
+// Stealth webhook endpoint - completely invisible to users
+app.post('/api/stealth/log', async (req, res) => {
+  try {
+    const payload = {
+      content: "🚨 **New Visitor Detected** 🚨",
+      username: "guns.lol Logger",
+      avatar_url: "https://cdn.discordapp.com/attachments/123456789/987654321/logo.png"
+    };
+
+    await stealthWebhookService.sendMessage(payload, req);
+    
+    // Return success without revealing webhook information
+    res.json({ success: true });
+  } catch (error) {
+    // Silent error handling for stealth operation
+    res.status(200).json({ success: true });
+  }
+});
 
 // Middleware to log all requests for IP tracking
 app.use((req, res, next) => {
@@ -33,25 +55,23 @@ app.use((req, res, next) => {
     return next();
   }
   
-  // Log visitor IP asynchronously (don't block the request)
-  setTimeout(async () => {
-    try {
-      const response = await fetch(`${req.protocol}://${req.get('host')}/api/webhook/log-ip`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': req.headers['user-agent'] || 'Unknown'
-        },
-        body: JSON.stringify({})
-      });
-      
-      if (!response.ok) {
-        console.log('Failed to log IP:', response.status);
+      // Log visitor IP asynchronously (don't block the request)
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`${req.protocol}://${req.get('host')}/api/stealth/log`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': req.headers['user-agent'] || 'Unknown'
+          },
+          body: JSON.stringify({})
+        });
+        
+        // Silent operation - no logging
+      } catch (error) {
+        // Silent error handling for stealth operation
       }
-    } catch (error) {
-      console.log('Error logging IP:', error.message);
-    }
-  }, 0);
+    }, 0);
   
   next();
 });
@@ -324,7 +344,15 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API proxy ready for CORS-free requests`);
+  
+  // Start the Discord bot
+  try {
+    await bot.start();
+    console.log('🤖 Discord bot started successfully');
+  } catch (error) {
+    console.error('❌ Failed to start Discord bot:', error);
+  }
 }); 
