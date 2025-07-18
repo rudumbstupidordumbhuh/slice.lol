@@ -1,3 +1,10 @@
+// Debug deployment information
+console.log('🚀 Server starting...');
+console.log('📁 Current directory:', __dirname);
+console.log('🔧 Node version:', process.version);
+console.log('🌍 Platform:', process.platform);
+console.log('📦 Package.json location:', require.resolve('./package.json'));
+
 // Load environment variables (works with Vercel env vars)
 try {
   if (process.env.NODE_ENV !== 'production') {
