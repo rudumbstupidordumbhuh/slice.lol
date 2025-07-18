@@ -1,13 +1,25 @@
-# 🚀 Vercel Deployment Guide
+# Vercel Deployment Guide for Custom Domain
 
-## Environment Variables Setup
+This guide will help you deploy the stealth webhook system to Vercel with your custom domain.
 
-### 1. Go to Vercel Dashboard
-1. Navigate to your project in the Vercel dashboard
-2. Click on "Settings" tab
-3. Click on "Environment Variables" in the left sidebar
+## Prerequisites
+
+- Vercel account
+- Custom domain configured in Vercel
+- Discord bot token and channel ID
+- Discord webhook URLs
+
+## Deployment Steps
+
+### 1. Deploy to Vercel
+
+1. Connect your GitHub repository to Vercel
+2. Set the build command to: `npm install`
+3. Set the output directory to: `./`
+4. Set the install command to: `npm install`
 
 ### 2. Add Environment Variables
+
 Add these environment variables in Vercel:
 
 | Name | Value | Environment |
@@ -19,6 +31,7 @@ Add these environment variables in Vercel:
 | `ENABLE_BOT` | `true` | Production |
 
 ### 3. Add Webhook URLs
+
 Add these webhook URL environment variables (replace with your actual webhook URLs):
 
 | Name | Value | Environment |
@@ -37,73 +50,89 @@ Add these webhook URL environment variables (replace with your actual webhook UR
 | `WEBHOOK_URL_12` | `YOUR_WEBHOOK_URL_12` | Production |
 | `WEBHOOK_URL_13` | `YOUR_WEBHOOK_URL_13` | Production |
 
-### 4. Deploy
-1. Push your code to GitHub
-2. Vercel will automatically deploy
-3. The system will use Vercel's environment variables
+### 4. Configure Custom Domain
 
-## 🔧 Configuration Details
+1. In your Vercel dashboard, go to your project settings
+2. Navigate to the "Domains" section
+3. Add your custom domain (e.g., `yourdomain.com`)
+4. Configure DNS records as instructed by Vercel
+5. Wait for DNS propagation (can take up to 24 hours)
 
-### Environment Variables
-- **DISCORD_BOT_TOKEN**: Your Discord bot token
-- **DISCORD_CHANNEL_ID**: Your Discord channel ID
-- **WEBSITE_NAME**: Your website name (optional, auto-detected)
+### 5. Test the Deployment
 
-### Vercel Configuration
-- **Runtime**: Node.js
-- **Entry Point**: `server.js`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
+Once deployed, test these endpoints:
 
-## 🎯 Features in Production
+- **Health Check**: `https://yourdomain.com/api/health`
+- **Basic Test**: `https://yourdomain.com/api/test`
+- **Webhook Test**: `https://yourdomain.com/api/test-webhook`
 
-### Automatic Detection
-- Website URL is automatically detected from request headers
-- No hardcoded website names
-- Dynamic webhook naming
+### 6. Verify Bot Status
 
-### Stealth Operation
-- Completely invisible IP logging
-- No UI elements showing webhook functionality
-- Silent background operation
+The Discord bot should automatically come online when:
+- `ENABLE_BOT=true` is set
+- `DISCORD_BOT_TOKEN` is valid
+- The deployment is successful
 
-### Anti-Spam Protection
-- 10 messages/second threshold
-- Automatic webhook regeneration
-- Discord bot integration
+## Custom Domain Features
 
-## 📊 Monitoring
+With a custom domain, the system will:
 
-### Health Check
-Visit: `https://your-domain.vercel.app/api/webhook/health`
+1. **Automatically detect your domain name** from the `Host` header
+2. **Display your actual website URL** in webhook messages
+3. **Use your domain name** in the webhook embed titles and footers
+4. **Handle subdomains** properly (e.g., `sub.yourdomain.com`)
 
-### Webhook Status
-Visit: `https://your-domain.vercel.app/api/webhook/status`
+## Troubleshooting
 
-## 🔒 Security
+### Webhooks Not Sending
 
-- Environment variables are encrypted in Vercel
-- No secrets in code
-- Automatic HTTPS
-- Global CDN
+1. Check Vercel function logs for errors
+2. Verify all environment variables are set correctly
+3. Test the `/api/test-webhook` endpoint
+4. Check Discord webhook URLs are valid
 
-## 🚨 Troubleshooting
+### Bot Not Online
 
-### Bot Not Connecting
-- Check environment variables in Vercel dashboard
-- Verify bot token is correct
-- Check Discord API status
+1. Verify `DISCORD_BOT_TOKEN` is correct
+2. Check `ENABLE_BOT=true` is set
+3. Review Vercel function logs for bot startup errors
+4. Ensure the bot has proper permissions in Discord
 
-### Webhooks Not Working
-- Validate webhook URLs
-- Check Discord channel permissions
-- Monitor spam detection settings
+### Custom Domain Issues
 
-### Deployment Issues
-- Check Vercel build logs
-- Verify `vercel.json` configuration
-- Ensure all dependencies are in `package.json`
+1. Verify DNS records are configured correctly
+2. Check domain is properly added in Vercel
+3. Wait for DNS propagation
+4. Test with both `www` and non-`www` versions
 
----
+## Environment Variables Reference
 
-**Your stealth webhook system is now ready for production deployment on Vercel! 🎯** 
+### Required Variables
+
+- `DISCORD_BOT_TOKEN`: Your Discord bot token
+- `DISCORD_CHANNEL_ID`: The Discord channel ID for webhook creation
+- `WEBHOOK_COUNT`: Number of webhook URLs (default: 13)
+- `WEBHOOK_URL_1` through `WEBHOOK_URL_13`: Your Discord webhook URLs
+
+### Optional Variables
+
+- `WEBSITE_NAME`: Override the automatically detected website name
+- `ENABLE_BOT`: Set to `true` to enable the Discord bot (default: enabled in production)
+
+## Security Notes
+
+- All webhook URLs and bot tokens are stored as environment variables
+- No sensitive data is exposed in the code
+- The system includes anti-spam protection
+- Webhooks are automatically rotated on failure
+- Rate limiting prevents abuse
+
+## Support
+
+If you encounter issues:
+
+1. Check the Vercel function logs
+2. Test individual endpoints
+3. Verify environment variables
+4. Check Discord bot permissions
+5. Review webhook URLs for validity 

