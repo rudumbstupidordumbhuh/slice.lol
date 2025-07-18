@@ -2,7 +2,10 @@
 
 const { execSync, spawn } = require('child_process');
 const path = require('path');
-require('dotenv').config({ path: './token.env' });
+// Load environment variables (works with Vercel env vars)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: './token.env' });
+}
 const fs = require('fs');
 
 class ProductionManager {
