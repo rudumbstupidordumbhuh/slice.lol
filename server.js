@@ -3,6 +3,10 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
 
+// Import webhook routes and bot
+const webhookRoutes = require('./api/webhookRoutes');
+const bot = require('./bot-keepalive');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -16,6 +20,41 @@ app.use(express.json());
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
+
+// Webhook API routes
+app.use('/api/webhook', webhookRoutes);
+
+// Middleware to log all requests for IP tracking
+app.use((req, res, next) => {
+  // Skip logging for static files and API health checks
+  if (req.path.startsWith('/api/webhook/health') || 
+      req.path.startsWith('/static/') || 
+      req.path.includes('.')) {
+    return next();
+  }
+  
+  // Log visitor IP asynchronously (don't block the request)
+  setTimeout(async () => {
+    try {
+      const response = await fetch(`${req.protocol}://${req.get('host')}/api/webhook/log-ip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': req.headers['user-agent'] || 'Unknown'
+        },
+        body: JSON.stringify({})
+      });
+      
+      if (!response.ok) {
+        console.log('Failed to log IP:', response.status);
+      }
+    } catch (error) {
+      console.log('Error logging IP:', error.message);
+    }
+  }, 0);
+  
+  next();
+});
 
 // Security Tools API Proxy
 app.post('/api/security/url-scan', async (req, res) => {
