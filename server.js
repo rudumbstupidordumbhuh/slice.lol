@@ -410,6 +410,59 @@ app.post('/api/test-webhook', async (req, res) => {
   }
 });
 
+// Manual webhook validation endpoint
+app.post('/api/validate-webhooks', async (req, res) => {
+  console.log('🔍 Manual webhook validation requested');
+  try {
+    if (!webhookService) {
+      throw new Error('WebhookService not initialized');
+    }
+    
+    await webhookService.validateAndCleanupWebhooks();
+    
+    const status = webhookService.getWebhookStatus();
+    console.log('✅ Webhook validation completed');
+    
+    res.json({
+      success: true,
+      message: 'Webhook validation completed',
+      status: status
+    });
+  } catch (error) {
+    console.error('❌ Webhook validation error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Webhook status endpoint
+app.get('/api/webhook-status', (req, res) => {
+  try {
+    if (!webhookService) {
+      throw new Error('WebhookService not initialized');
+    }
+    
+    const status = webhookService.getWebhookStatus();
+    const spamStats = webhookService.getSpamStats();
+    
+    res.json({
+      success: true,
+      webhooks: status,
+      spamStats: spamStats,
+      totalWebhooks: webhookService.webhooks.length,
+      activeWebhooks: webhookService.webhooks.filter(w => w.status === 'active').length
+    });
+  } catch (error) {
+    console.error('❌ Webhook status error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Catch-all route for SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
