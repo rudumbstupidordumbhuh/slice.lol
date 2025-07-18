@@ -14,8 +14,8 @@ cp env.example .env
 
 2. **Edit the `.env` file** with your actual values:
 ```env
-DISCORD_BOT_TOKEN=MTM5MzYzMzc0Mzc5NjY5OTEzNg.GNXETy.tKy8xRHWGYqAkYnuniw2FxXPjegZdh3plC4Z_U
-DISCORD_CHANNEL_ID=1393371863542923368
+DISCORD_BOT_TOKEN=your_actual_bot_token_here
+DISCORD_CHANNEL_ID=your_actual_channel_id_here
 ```
 
 3. **Install dotenv** (if not already installed):
