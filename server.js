@@ -17,18 +17,8 @@ try {
 // Debug environment variables
 console.log('🔧 Environment Debug:');
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('DISCORD_BOT_TOKEN:', process.env.DISCORD_BOT_TOKEN ? 'SET' : 'NOT SET');
-console.log('DISCORD_CHANNEL_ID:', process.env.DISCORD_CHANNEL_ID ? 'SET' : 'NOT SET');
 console.log('WEBSITE_NAME:', process.env.WEBSITE_NAME);
 console.log('WEBHOOK_COUNT:', process.env.WEBHOOK_COUNT);
-console.log('ENABLE_BOT:', process.env.ENABLE_BOT);
-
-// Check for required environment variables
-const requiredEnvVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CHANNEL_ID'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-if (missingVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingVars);
-}
 
 const express = require('express');
 const cors = require('cors');
@@ -43,15 +33,6 @@ try {
 } catch (error) {
   console.error('❌ Failed to load StealthWebhookService:', error.message);
   process.exit(1);
-}
-
-// Import bot keepalive
-let BotKeepAlive;
-try {
-  BotKeepAlive = require('./bot-keepalive');
-  console.log('✅ BotKeepAlive loaded successfully');
-} catch (error) {
-  console.error('❌ Failed to load BotKeepAlive:', error.message);
 }
 
 const app = express();
@@ -283,26 +264,12 @@ app.post('/api/stealth/log', async (req, res) => {
           console.error(`❌ Webhook error response: ${response.status} - ${responseText}`);
 
           if (response.status === 404) {
-            // Webhook was deleted - mark as inactive and try to create new one
+            // Webhook was deleted - mark as inactive
             console.log(`❌ Webhook ${webhook.id} was deleted (404), marking as inactive`);
             webhook.status = 'inactive';
             webhook.failureCount = webhookService.maxFailures + 1;
             webhook.lastFailure = Date.now();
-            
-            // Try to create a new webhook to replace the deleted one
-            console.log(`🔄 Attempting to create new webhook to replace deleted one...`);
-            const newWebhook = await webhookService.createWebhook(`${websiteName} Logger ${Date.now()}`);
-            
-            if (newWebhook) {
-              console.log(`✅ Successfully created new webhook: ${newWebhook.id}`);
-              // Replace the old webhook with the new one
-              const index = webhookService.webhooks.findIndex(w => w.id === webhook.id);
-              if (index !== -1) {
-                webhookService.webhooks[index] = newWebhook;
-              }
-            } else {
-              console.error(`❌ Failed to create new webhook to replace deleted one`);
-            }
+            console.log(`⚠️ Cannot create new webhook (no bot available)`);
           } else if (response.status === 429) {
             // Rate limited - wait and retry
             const retryAfter = response.headers.get('retry-after') || 60;
@@ -431,9 +398,6 @@ app.get('/api/health', (req, res) => {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       webhookCount: webhookService?.webhooks?.length || 0,
-      botToken: process.env.DISCORD_BOT_TOKEN ? 'SET' : 'NOT SET',
-      channelId: process.env.DISCORD_CHANNEL_ID ? 'SET' : 'NOT SET',
-      enableBot: process.env.ENABLE_BOT,
       webhookService: !!webhookService,
       webhookUrls: webhookService?.webhooks?.map(w => w.url ? 'SET' : 'NOT SET') || []
     };
@@ -547,7 +511,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Start server and bot
+// Start server
 const startServer = async () => {
   try {
     console.log('🚀 Starting server...');
@@ -568,35 +532,6 @@ const startServer = async () => {
       console.log(`   - POST /api/test-webhook`);
       console.log(`   - POST /api/stealth/log`);
     });
-
-    // Start Discord bot (only in production or if explicitly enabled)
-    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_BOT === 'true') {
-      console.log('🤖 Attempting to start Discord bot...');
-      
-      if (!BotKeepAlive) {
-        console.error('❌ BotKeepAlive not loaded, skipping bot startup');
-        return;
-      }
-      
-      if (!process.env.DISCORD_BOT_TOKEN) {
-        console.error('❌ DISCORD_BOT_TOKEN not set, skipping bot startup');
-        return;
-      }
-      
-      try {
-        const bot = new BotKeepAlive();
-        console.log('🤖 BotKeepAlive instance created');
-        
-        await bot.start();
-        console.log('🤖 Discord bot started successfully');
-      } catch (botError) {
-        console.error('❌ Failed to start Discord bot:', botError.message);
-        console.error('❌ Bot error stack:', botError.stack);
-      }
-    } else {
-      console.log('🤖 Discord bot disabled (not in production mode)');
-      console.log('🤖 Set ENABLE_BOT=true to enable bot in development');
-    }
 
   } catch (error) {
     console.error('❌ Failed to start server:', error.message);
